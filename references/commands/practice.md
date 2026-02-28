@@ -58,6 +58,8 @@ The first round of every practice session is explicitly **unscored**. Its purpos
 - Give brief, encouraging feedback (no scoring, no rubric).
 - Then transition: "Good, you're warmed up. From here on I'll score each round."
 
+**Level 5 warmup skip option**: At Level 5, offer the option to skip: "At your directness level, you can skip the warmup and go straight to scored rounds. Want the warmup or jump in?" Respect either choice. At Levels 1-4, warmup remains mandatory and unscored.
+
 ### Round Protocol (every drill round)
 
 1. State round objective.
@@ -66,8 +68,10 @@ The first round of every practice session is explicitly **unscored**. Its purpos
 4. Ask self-reflection (with specific score self-estimate).
 5. Give strengths-first feedback **based on your independent assessment, not theirs**. If your read differs from the candidate's self-assessment, name the difference explicitly: "You rated yourself a 3 on Structure, but I'd put it at 2 — here's what I noticed." Never quietly adjust your scores to match theirs.
 6. Score using 5-dimension rubric.
+6a. **Role-drill score mapping** (for `practice role` and other role-specific drills): After scoring with the native drill axes, map scores to core dimensions using the mapping table in `references/calibration-engine.md` Section 5. Record the blended scores in Score History alongside the native drill scores. This ensures role-drill performance feeds into trend analysis, calibration checks, and graduation criteria.
 7. Record self-assessment vs. coach-assessment delta.
 8. **Cross-reference peak moments.** After 3+ rounds, reference the candidate's best moment from a previous round: "Your answer in round 2 hit a 4 on Structure — that's what you're capable of. The goal is making that your floor, not your ceiling." This builds confidence and gives a concrete target.
+8a. **Round Challenge (Level 5, rounds 3+ only).** Apply one Challenge Protocol lens per round, rotated: Assumption → Blind Spot → Pre-Mortem → Devil's Advocate → cycle back. Keep to 1-2 sentences — a quick, sharp provocation that pushes the candidate to think differently about what they just said. At Levels 1-4: skip.
 9. Set one specific change for next round.
 
 ### Round Output Schema
@@ -101,10 +105,13 @@ The first round of every practice session is explicitly **unscored**. Its purpos
 ## Interviewer's Read
 [1-2 key moments from this round, told from the interviewer's perspective]
 
+## Challenge Note (Level 5, rounds 3+ only)
+[One lens, 1-2 sentences]
+
 ## Next Round Adjustment
 - Try this single change:
 
-**Next commands**: `practice [next drill]`, `stories`, `mock [format]`, `progress`
+**Recommended next**: `practice [next drill or continue]` — [reason based on round performance]. **Alternatives**: `stories`, `mock [format]`, `progress`
 ```
 
 #### Interviewer's Read — How To Write It
@@ -118,6 +125,8 @@ Keep it to 1-2 moments per round — practice rounds are short, so be selective.
 - "The moment that landed strongest was when you [specific moment] — that's the kind of detail that makes an interviewer lean in."
 
 **Connect to the scoring.** The Interviewer's Read should make the scorecard *make sense*. If Structure scored a 2, the monologue should show what that felt like from the other side of the table: "I was 30 seconds in and still didn't know where this was going. That uncertainty is what a 2 on Structure feels like to an interviewer."
+
+**Level 5, rounds 3+**: Expand from 1-2 moments to a mini Inner Monologue (3-4 sentences showing the interviewer's real-time evaluative stream). Closer to mock's Inner Monologue — show what the answer felt like from the other side, including positive reactions, doubt, and pivot points. At Levels 1-4, keep to the standard 1-2 moments.
 
 ### Coaching State Integration
 

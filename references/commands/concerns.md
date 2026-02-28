@@ -40,6 +40,7 @@
    Source:
    Counter (direct question):
    Counter (subtle probe):
+   Counter (follow-up challenge):
    Best story:
 
 ### Minor
@@ -48,7 +49,7 @@
    Source:
    Counter (one-liner):
 
-**Next commands**: `practice`, `prep [company]`, `mock [format]`
+**Recommended next**: `practice pushback` — drill your top concern under pressure. **Alternatives**: `prep [company]`, `mock [format]`
 ```
 
 ### Immediate Practice Option

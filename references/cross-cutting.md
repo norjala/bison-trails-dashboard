@@ -121,6 +121,8 @@ Interview failure is frequently emotional, not intellectual. This module address
 - **Structured debrief**: Instead of spiraling, channel energy into `analyze`. Turn anxiety into data.
 - **Rejection reframe**: "Rejection means this specific role at this specific company at this specific time wasn't a fit. It is not a verdict on your worth or capability."
 
+**Avoidance vs. Readiness**: At Level 5, the Challenge Protocol overrides the compassion-first default for avoidance detection. Avoidance is named, not accommodated — see the Avoidance Confrontation Protocol in `references/challenge-protocol.md`. At Levels 1-4, compassion-first remains unchanged: note patterns in Coaching Notes and raise gently during meta-checks.
+
 **Integration:**
 - `hype` includes a psychological warmup and mid-interview recovery scripts.
 - `progress` monitors for emotional patterns (declining engagement, increased self-criticism, avoidance of practice) and addresses them directly.
@@ -144,6 +146,88 @@ If scoring reveals patterns consistent with cultural communication differences (
 
 ---
 
+## Role-Fit Assessment Module
+
+Targeting the right roles is as important as performing well in interviews. This module provides a structured framework for evaluating candidate-role fit, used by `research`, `kickoff`, `prep`, and `progress`.
+
+### Five Fit Dimensions
+
+| Dimension | What It Measures | Data Source |
+|---|---|---|
+| **Requirement Coverage** | How many "required" qualifications the candidate meets vs. misses | JD + resume |
+| **Seniority Alignment** | Whether the candidate's experience level matches the role's expectations | JD + resume + career trajectory |
+| **Domain Relevance** | How transferable the candidate's industry/domain experience is | JD + resume + company context |
+| **Competency Overlap** | Overlap between the candidate's demonstrated skills and the role's core competencies | JD + storybank (if available) + resume |
+| **Trajectory Coherence** | Whether this role makes sense as the candidate's next career move — narratively and developmentally | Resume + career history + target role |
+
+Score each dimension: Strong / Moderate / Weak. Not every dimension needs data — flag unknowns explicitly.
+
+### Three-Tier Verdict
+
+**Strong Fit** — Candidate meets most requirements, seniority aligns, domain is relevant or closely adjacent, competencies overlap substantially, and the role is a logical next step. Prep focuses on positioning and differentiation.
+
+**Stretch Fit** — Candidate has meaningful gaps but also clear strengths. Two sub-categories:
+- **Investable Stretch**: 1-2 addressable gaps (domain switch with transferable skills, one level up with strong trajectory). The candidate can make a credible case. Prep focuses on gap-bridging narratives and concern counters.
+- **Long-Shot Stretch**: 3+ gaps or a fundamental mismatch (2+ levels up, zero domain overlap, missing hard requirements). The candidate should understand the odds. Coach helps if they choose to proceed, but names the reality.
+
+**Weak Fit** — Fundamental misalignment across multiple dimensions. The honest coaching move is to say so and suggest better-fit alternatives.
+
+### Confidence by Data Availability
+
+| Data Available | What You Can Assess | What You Can't |
+|---|---|---|
+| Company name only | Seniority Alignment (from public info), Trajectory Coherence | Requirement Coverage, Competency Overlap (no JD) |
+| Company + JD | All 5 dimensions at moderate confidence | Deep domain relevance (may need research) |
+| Company + JD + Resume | All 5 dimensions at high confidence | — |
+| Company + JD + Resume + Storybank | All 5 dimensions at highest confidence (competency overlap is evidence-based, not inferred) | — |
+
+When data is limited, assess what you can and flag what's missing: "I can assess Seniority Alignment and Trajectory Coherence from what I know. For a full fit assessment, I'd need the JD."
+
+### Alternative Suggestions Protocol
+
+When fit is Weak or Long-Shot Stretch, don't just diagnose — help redirect:
+
+1. **Name the specific gaps** driving the weak assessment (not vague "not a great fit")
+2. **Suggest what a better-fit version of this role looks like**: "Based on your profile, you'd be a stronger fit for [role type] at [company stage/type] because [specific reason]"
+3. **If the candidate wants to proceed anyway**, respect their agency but adjust coaching: "Your odds are lower here, and that's okay if you've decided it's worth the shot. Let me help you build the strongest possible case for the gaps they'll see."
+
+### Anti-Patterns
+
+- Don't gatekeep. The candidate decides whether to apply — the coach provides honest assessment, not permission.
+- Don't conflate "stretch" with "impossible." Career growth requires stretch roles. The question is whether the stretch is bridgeable.
+- Don't assess fit based on vibes. Use the 5 dimensions with evidence.
+- Don't over-index on requirement coverage. Many JDs are wish lists. A candidate who meets 60-70% of requirements is often competitive.
+- Don't ignore trajectory coherence. A role someone is qualified for but that doesn't advance their career is a poor fit in a different way.
+
+### Integration
+
+- `kickoff`: Target Reality Check — fires only on clear mismatches (2+ level seniority gap, zero domain experience, function switch without bridge narrative)
+- `research`: Structured Fit Assessment replaces the current vibes-based section — uses the 3 dimensions assessable without a JD
+- `prep`: Full 5-dimension assessment with JD + resume + storybank data. Distinguishes frameable gaps (can counter with narrative) from structural gaps (real limitations)
+- `progress`: Outcome-Based Targeting Insights — when 3+ real interview outcomes exist, analyzes rejection patterns to surface targeting issues
+
+---
+
+## Challenge Protocol Module (Directness Level 5)
+
+At Level 5, the Challenge Protocol (`references/challenge-protocol.md`) activates structured challenge across multiple commands. This module does not fire at Levels 1-4.
+
+**Integration points:**
+- `stories add` / `stories improve` → Story Red Team (all 5 lenses)
+- `analyze` → Transcript Challenge (lenses 1-4 against overall performance; lens 5 feeds Priority Move)
+- `practice` rounds 3+ → Round Challenge (single lens, rotated, 1-2 sentences)
+- `progress` → Hard Truth (the single hardest thing the coach needs to say)
+- `hype` → Pre-Mortem (2-3 failure modes with prevention cues)
+- `feedback` Type B rejection → Rejection Leverage (retrospective lenses 1-3)
+
+**Avoidance Confrontation**: At Level 5, when avoidance patterns are detected (3+ instances of the same pattern — skipping competencies, choosing safe drills, changing subjects on weaknesses), name it directly: "I've noticed you've steered away from [topic] three times now. That's usually a signal that this is exactly where we need to go." At Levels 1-4, note in Coaching Notes and raise gently during meta-checks.
+
+**Key principle**: Challenge without resolution is cruelty. Every challenge ends with a concrete, actionable fix.
+
+See `references/challenge-protocol.md` for the full framework, five lenses, and per-command invocation details.
+
+---
+
 ## Cross-Command Dependency Module
 
 Commands produce better output when they have data from other commands. This table shows what each command can do with and without various pieces of coaching state. Use this to suggest prerequisites when a command would benefit from missing data.
@@ -152,9 +236,10 @@ Commands produce better output when they have data from other commands. This tab
 |---|---|---|---|
 | `kickoff` | — | Everything — this is the entry point | — |
 | `research` | Profile from `kickoff` | Profile (gives generic fit assessment) | Company name |
-| `prep` | Storybank, coaching state profile, interviewer links | Storybank (can't do story mapping, flags the gap), profile (infers from JD) | Company + JD |
+| `prep` | Storybank, coaching state profile, interviewer links, Interview Intelligence (Company Patterns, Question Bank), `references/story-mapping-engine.md` (for portfolio-optimized story mapping when storybank exists) | Storybank (can't do story mapping, flags the gap), profile (infers from JD), Interview Intelligence (loses real-question weighting and company pattern data) | Company + Role/seniority + JD |
 | `analyze` | Coaching state (seniority band, storybank for story matching) | Seniority band (asks for it), storybank (skips story mapping) | Transcript |
-| `debrief` | Storybank (for Last Used updates), Interview Loops (for context) | Both (captures data without cross-referencing) | — |
+| `feedback` | Interview Intelligence (for cross-referencing feedback with existing data), Interview Loops, Score History | All (captures data without cross-referencing) | — |
+| `debrief` | Storybank (for Last Used updates), Interview Loops (for context), Interview Intelligence Question Bank (for past question similarity checks) | All (captures data without cross-referencing) | — |
 | `practice` | Score history (to set drill stage), storybank (for tailored questions), prep data (for company-specific drills), Drill Progression (for current stage) | All (uses generic questions, starts at Stage 1) | — |
 | `mock` | Prep data, storybank, score history, interviewer intel, concerns data (for targeted questions) | All (uses generic questions and personas) | Format |
 | `stories` | Resume analysis from kickoff (for story seeds) | Resume (uses reflective prompts instead) | — |
@@ -162,7 +247,7 @@ Commands produce better output when they have data from other commands. This tab
 | `questions` | Prep data, interviewer intel, interview stage | All (generates generic questions) | — |
 | `hype` | Score history, storybank, prep brief, concerns, resume analysis | All (falls back to resume-based hype — explicitly flagged) | — |
 | `thankyou` | Debrief data, Interview Loops, interviewer intel | All (asks candidate for callbacks) | — |
-| `progress` | 3+ scored sessions, outcome data | Works with 1-2 sessions (reduced — see minimum data thresholds) | At least 1 scored session |
+| `progress` | 3+ scored sessions, outcome data, Interview Intelligence (Question Bank, Feedback, Patterns) | Works with 1-2 sessions (reduced — see minimum data thresholds), Interview Intelligence (loses question-type performance and accumulated pattern analysis) | At least 1 scored session |
 | `negotiate` | Interview Loops, outcome log | Both (collects offer details fresh) | Offer details |
 | `reflect` | Full coaching state with score history and outcomes | Score history (narrates from limited data) | — |
 

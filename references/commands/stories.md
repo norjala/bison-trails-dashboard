@@ -59,6 +59,18 @@ When improving a story, preserve the previous version in the Story Details secti
 - Update the STAR text in Story Details with the improved version
 - This serves two purposes: (1) the candidate can see their progress over time, and (2) if the "improved" version stops landing in interviews, the coach can reference what changed and potentially revert.
 
+### Story Red Team (Directness Level 5)
+
+After `stories add` or `stories improve`, run all 5 Challenge Protocol lenses against the story:
+
+1. **Assumption Audit**: What must be true for this story to land? What interviewer framework is it assuming?
+2. **Blind Spot Scan**: What's invisible to the candidate about their own story? What context do they take for granted?
+3. **Pre-Mortem**: How does this story fail in a real interview? Where does it lose attention or raise doubt?
+4. **Devil's Advocate**: Where does a skeptical interviewer attack? What follow-up questions expose weaknesses?
+5. **Strengthening Path**: One specific change that makes it airtight.
+
+At Levels 1-4: Skip. The standard improve diagnostic is sufficient.
+
 ### Story Records
 
 See `references/storybank-guide.md` for the full storybank format, column definitions, and skill tags. Every story record must include an Earned Secret field — see `references/differentiation.md` for the extraction protocol.
@@ -67,10 +79,11 @@ See `references/storybank-guide.md` for the full storybank format, column defini
 
 When the candidate selects "Find gaps," don't just list missing competencies — rank them by how much they matter for this candidate's target roles:
 
-1. Cross-reference the candidate's target roles/companies (from `coaching_state.md`) with the storybank's skill coverage.
-2. For each gap, assess: **Critical** (this competency will definitely be tested and no story exists), **Important** (likely to come up, only weak stories available), **Nice-to-have** (might come up, but won't make or break the interview).
-3. For critical gaps, check: can an existing story be reframed to cover this competency, or does the candidate need to surface a new experience entirely?
+1. Cross-reference the candidate's target roles/companies (from `coaching_state.md`) with the storybank's skill coverage. **Check both Primary and Secondary Skills** — a competency may be covered as a secondary skill in an existing story, which changes the gap from "no story" to "Workable coverage" (see `references/story-mapping-engine.md` for fit scoring).
+2. For each gap, assess: **Critical** (this competency will definitely be tested and no story exists, even as a secondary skill), **Important** (likely to come up, only weak stories or secondary-skill-only coverage available), **Nice-to-have** (might come up, but won't make or break the interview).
+3. For critical gaps, check: can an existing story be reframed to cover this competency (using its secondary skill or an adjacent experience), or does the candidate need to surface a new experience entirely?
 4. Prescribe gap-handling patterns (from the Gap-Handling Module) for any competencies where no real story exists.
+5. **Cross-reference with active prep briefs**: If the candidate has active prep briefs (from `prep`), check predicted questions against gaps. A gap that maps to a predicted question at a current target company is elevated to Critical regardless of general frequency.
 
 A PM interviewing at Stripe with no "influence without authority" story has a critical gap. The same candidate missing a "technical depth" story has a nice-to-have gap. Rank accordingly.
 
@@ -123,7 +136,7 @@ Requires 5+ stories in the storybank. If fewer exist, redirect: "Narrative ident
 - **In questions you ask**: [How to ask questions that reinforce your themes]
 - **In positioning**: [How themes inform your "why this role / why this company" narrative]
 
-**Next commands**: `stories improve S###`, `stories add`, `practice`, `prep [company]`
+**Recommended next**: `stories improve S###` — strengthen your sharpest-edge stories. **Alternatives**: `stories add`, `practice`, `prep [company]`
 ```
 
 ### Output Schema (per action)
@@ -137,7 +150,14 @@ Requires 5+ stories in the storybank. If fewer exist, redirect: "Narrative ident
 - Strength: [1-5]
 - Deploy for: [one-line use case]
 
-**Next commands**: `stories improve S###`, `stories find gaps`, `practice retrieval`, `concerns`
+## Story Red Team (Level 5 only)
+- Assumption: [what must be true for this to land]
+- Blind spot: [what you can't see about your own story]
+- Failure mode: [how this fails in a real interview]
+- Attack surface: [where a skeptic probes]
+- Fix: [one change that makes it airtight]
+
+**Recommended next**: `stories improve S###` — strengthen the story based on the red team findings. **Alternatives**: `stories find gaps`, `practice retrieval`, `concerns`
 ```
 
 **After `stories improve`:**
@@ -147,7 +167,14 @@ Requires 5+ stories in the storybank. If fewer exist, redirect: "Narrative ident
 - What changed: [brief description]
 - Version history updated
 
-**Next commands**: `stories view`, `practice`, `analyze`
+## Story Red Team (Level 5 only)
+- Assumption: [what must be true for this to land]
+- Blind spot: [what you can't see about your own story]
+- Failure mode: [how this fails in a real interview]
+- Attack surface: [where a skeptic probes]
+- Fix: [one change that makes it airtight]
+
+**Recommended next**: `practice` — test the improved story under pressure. **Alternatives**: `stories view`, `stories improve S###`, `analyze`
 ```
 
 **After `stories find gaps`:**
@@ -163,5 +190,5 @@ Requires 5+ stories in the storybank. If fewer exist, redirect: "Narrative ident
 ### Nice-to-Have (might come up)
 1. [competency]
 
-**Next commands**: `stories add`, `practice gap`, `prep [company]`
+**Recommended next**: `stories add` — fill the highest-priority gap. **Alternatives**: `practice gap`, `prep [company]`
 ```
