@@ -1276,7 +1276,7 @@
 <div id="wizard-view">
   <div class="wizard">
     <div class="wizard-header">
-      <h1>Create Validator</h1>
+      <h1>Create Participate Cluster</h1>
       <p>Deploy blockchain infrastructure in minutes</p>
     </div>
 
@@ -1292,7 +1292,7 @@
     <div class="step-labels" id="stepLabels">
       <span class="step-label active">Network</span>
       <span class="step-label">Provider & Region</span>
-      <span class="step-label">Nodes</span>
+      <span class="step-label">Clusters</span>
       <span class="step-label">Review</span>
     </div>
 
@@ -1342,7 +1342,7 @@
         </div>
 
         <div class="step-title" id="regionTitle" style="margin-top: 32px; display: none;">Select Region</div>
-        <div class="step-subtitle" id="regionSubtitle" style="display: none;">Choose a deployment region for your validator nodes.</div>
+        <div class="step-subtitle" id="regionSubtitle" style="display: none;">Choose a deployment region for your participate clusters.</div>
         <div class="region-list" id="regionList">
           <!-- Populated by JS -->
         </div>
@@ -1350,8 +1350,8 @@
 
       <!-- STEP 3: Configure Node Types -->
       <div class="step" id="step-3">
-        <div class="step-title">Configure Validator Nodes</div>
-        <div class="step-subtitle">Flow separates work across specialized node roles instead of requiring every node to do everything. Bison Trails supports all four.</div>
+        <div class="step-title">Configure Participate Clusters</div>
+        <div class="step-subtitle">Flow separates work across specialized cluster roles instead of requiring every cluster to do everything. Bison Trails supports all four.</div>
 
         <!-- Pipeline visualization -->
         <div class="pipeline" id="pipeline">
@@ -1412,7 +1412,7 @@
     <!-- Dashboard Header -->
     <div class="dash-header">
       <div class="dash-header-left">
-        <h1>Your Flow Nodes</h1>
+        <h1>Your Flow Participate Clusters</h1>
         <div class="network-badge">
           <span class="dot"></span>
           Connected to Flow Mainnet
@@ -1464,15 +1464,15 @@
     <!-- Node Status Panel -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Node Status</span>
+        <span class="card-title">Participate Cluster Status</span>
         <span class="card-badge badge-teal" id="nodeCountBadge">30 Active</span>
       </div>
 
       <table class="node-table" id="nodeTable">
         <thead>
           <tr>
-            <th>Node Type</th>
-            <th>Nodes</th>
+            <th>Cluster Type</th>
+            <th>Clusters</th>
             <th>Status</th>
             <th>Uptime</th>
             <th>Last Epoch</th>
@@ -1491,7 +1491,7 @@
       <div class="card">
         <div class="card-header">
           <span class="card-title">Staking Distribution</span>
-          <span class="card-badge badge-blue">4 Node Types</span>
+          <span class="card-badge badge-blue">4 Cluster Types</span>
         </div>
 
         <div class="staking-bars" id="stakingBars">
@@ -1545,7 +1545,7 @@
             <th>Uptime</th>
             <th>Blocks Produced</th>
             <th>Rewards Earned</th>
-            <th>Node Participation</th>
+            <th>Cluster Participation</th>
           </tr>
         </thead>
         <tbody id="epochTableBody">
@@ -1817,7 +1817,7 @@
       '<div class="review-section">' +
         '<h4>Network</h4>' +
         '<div class="review-value">' + state.protocol.charAt(0).toUpperCase() + state.protocol.slice(1) + '</div>' +
-        '<div class="review-detail">Mainnet &middot; All 4 node types supported</div>' +
+        '<div class="review-detail">Mainnet &middot; All 4 cluster types supported</div>' +
       '</div>' +
       '<div class="review-section">' +
         '<h4>Infrastructure</h4>' +
@@ -1825,7 +1825,7 @@
         '<div class="review-detail">' + state.region + ' (' + regionName + ')</div>' +
       '</div>' +
       '<div class="review-section">' +
-        '<h4>Node Configuration &mdash; ' + totalNodes + ' Nodes</h4>' +
+        '<h4>Cluster Configuration &mdash; ' + totalNodes + ' Clusters</h4>' +
         '<div class="review-nodes-list">' + nodesHtml + '</div>' +
       '</div>';
 
@@ -1845,7 +1845,7 @@
     var deployStepsData = [{ text: 'Initializing cloud resources...' }];
     Object.keys(state.nodes).forEach(function (type) {
       if (state.nodes[type].enabled) {
-        deployStepsData.push({ text: 'Deploying ' + type + ' nodes...' });
+        deployStepsData.push({ text: 'Deploying ' + type + ' clusters...' });
       }
     });
     deployStepsData.push({ text: 'Configuring monitoring...' });
@@ -2043,15 +2043,15 @@
       { time: '10:40', tag: 'exec',   label: 'Execution', text: 'Execution state committed — 842 transactions processed' },
       { time: '10:39', tag: 'block',  label: 'Block',     text: 'Block #14,283,090 finalized — 2.5s consensus time' },
       { time: '10:38', tag: 'reward', label: 'Reward',    text: 'Epoch 847 rewards: +1,284.5 FLOW distributed to 23 delegators' },
-      { time: '10:37', tag: 'node',   label: 'Node',      text: 'Consensus node #7 — heartbeat OK, 0 missed blocks' },
+      { time: '10:37', tag: 'node',   label: 'Cluster',   text: 'Consensus cluster #7 — heartbeat OK, 0 missed blocks' },
       { time: '10:36', tag: 'stake',  label: 'Stake',     text: 'Delegation received: 8,200 FLOW from 0x2b91...e847' },
       { time: '10:35', tag: 'exec',   label: 'Execution', text: 'Contract call batch: 1,247 CryptoKitties transfers processed' },
       { time: '10:34', tag: 'block',  label: 'Block',     text: 'Block #14,283,089 finalized — 2.6s consensus time' },
-      { time: '10:33', tag: 'node',   label: 'Node',      text: 'Collection cluster rebalanced — 8 nodes, 0 dropped transactions' },
+      { time: '10:33', tag: 'node',   label: 'Cluster',   text: 'Collection cluster rebalanced — 8 clusters, 0 dropped transactions' },
       { time: '10:32', tag: 'reward', label: 'Reward',    text: 'Staking reward accrual: 142.3 FLOW pending for next epoch' },
       { time: '10:31', tag: 'stake',  label: 'Stake',     text: 'New delegator: 0xf4c8...a012 staked 5,000 FLOW' },
       { time: '10:30', tag: 'exec',   label: 'Execution', text: 'Execution state snapshot — 8.4M cumulative contract calls this epoch' },
-      { time: '10:29', tag: 'node',   label: 'Node',      text: 'Verification node #3 — chunk verification complete, 0 discrepancies' },
+      { time: '10:29', tag: 'node',   label: 'Cluster',   text: 'Verification cluster #3 — chunk verification complete, 0 discrepancies' },
       { time: '10:28', tag: 'block',  label: 'Block',     text: 'Block #14,283,088 finalized — 2.4s consensus time' }
     ];
 
