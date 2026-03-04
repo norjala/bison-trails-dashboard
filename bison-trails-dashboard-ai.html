@@ -412,6 +412,49 @@ body.dashboard-active .reset-btn{display:flex}
 .report-line{opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
 .report-line.visible{opacity:1;transform:translateY(0)}
 
+/* Rewards Reporting */
+.rewards-reporting{margin-bottom:24px}
+.rewards-time-filters{display:flex;gap:8px;margin-bottom:16px}
+.rewards-time-btn{font-family:var(--font);font-size:.78rem;font-weight:600;padding:6px 16px;border-radius:99px;border:1px solid var(--border);background:var(--bg-surface);color:var(--text-dim);cursor:pointer;transition:all var(--transition)}
+.rewards-time-btn:hover{border-color:var(--accent-gold);color:var(--accent-gold)}
+.rewards-time-btn.active{background:rgba(245,213,71,.12);border-color:var(--accent-gold);color:#b8960a}
+.rewards-chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:16px;position:relative}
+.rewards-chart-svg{width:100%;height:auto;display:block}
+.rewards-summary-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.rewards-tooltip-ai{position:absolute;pointer-events:none;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:.78rem;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .15s;z-index:10;white-space:nowrap}
+.rewards-tooltip-ai.visible{opacity:1}
+.rewards-download-btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--font);font-size:.85rem;font-weight:600;padding:10px 20px;border-radius:var(--radius);border:1px solid rgba(46,205,176,.3);background:rgba(46,205,176,.08);color:var(--accent-teal);cursor:pointer;transition:all var(--transition)}
+.rewards-download-btn:hover{background:rgba(46,205,176,.15);border-color:var(--accent-teal)}
+
+/* AI Restaking Agent */
+.restake-agent{margin-bottom:24px}
+.restake-agent-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;overflow:hidden}
+.restake-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.restake-toggle-wrap{display:flex;align-items:center;flex-shrink:0}
+.restake-toggle-wrap .node-toggle.on{background:var(--accent-violet)}
+.restake-body{max-height:0;overflow:hidden;opacity:0;transition:max-height .4s ease,opacity .3s ease,padding .3s ease}
+.restake-body.active{max-height:2000px;opacity:1;padding-top:16px}
+.restake-strategies{display:flex;gap:12px}
+.restake-strategy{flex:1;border:1px solid var(--border);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all var(--transition);background:var(--bg-surface)}
+.restake-strategy:hover{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.02)}
+.restake-strategy.selected{border-color:var(--accent-violet);background:rgba(124,58,237,.06)}
+.restake-strategy-name{font-weight:700;font-size:.92rem;margin-bottom:4px}
+.restake-strategy-desc{font-size:.78rem;color:var(--text-dim);margin-bottom:10px;line-height:1.4}
+.restake-strategy-yield{font-family:var(--font-mono);font-size:1.1rem;font-weight:700;color:var(--accent-violet)}
+.restake-strategy-risk{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+.restake-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.restake-activity{max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--radius);padding:12px}
+.restake-activity::-webkit-scrollbar{width:4px}
+.restake-activity::-webkit-scrollbar-track{background:transparent}
+.restake-activity::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.restake-activity-entry{display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem;line-height:1.4;animation:fade-in .3s ease}
+.restake-activity-entry:last-child{border-bottom:none}
+.restake-activity-time{color:var(--text-muted);font-size:.72rem;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:70px;flex-shrink:0}
+.restake-activity-text{color:var(--text-dim)}
+.restake-activity-text strong{color:var(--text);font-weight:600}
+.restake-activity-tag{display:inline-block;font-size:.65rem;font-weight:600;padding:1px 6px;border-radius:4px;margin-right:4px;background:rgba(124,58,237,.1);color:var(--accent-violet)}
+.restake-status-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent-teal);animation:breathe 2s ease-in-out infinite;margin-right:4px}
+
 /* Full coverage note */
 .full-coverage-note{font-size:12px;color:var(--accent-blue);font-weight:600;display:flex;align-items:center;gap:6px;margin-top:12px;padding:8px 14px;background:rgba(79,140,247,.06);border-radius:var(--radius)}
 
@@ -446,6 +489,9 @@ body.dashboard-active .reset-btn{display:flex}
   .ai-preflight-grid{grid-template-columns:1fr}
   .node-tabs{flex-wrap:wrap}
   .staking-grid{grid-template-columns:1fr 1fr}
+  .rewards-summary-metrics{grid-template-columns:repeat(2,1fr)}
+  .restake-strategies{flex-direction:column}
+  .restake-metrics{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -643,6 +689,8 @@ body.dashboard-active .reset-btn{display:flex}
         <button onclick="setQuery('Predict network health for next 7 days')">Predict network health</button>
         <button onclick="setQuery('What\'s our biggest risk right now?')">Biggest risk right now?</button>
         <button onclick="setQuery('Generate a weekly report')">Generate weekly report</button>
+        <button onclick="setQuery('How much rewards did I earn last month?')">Rewards earned</button>
+        <button onclick="setQuery('How is the restaking agent performing?')">AI restaking status</button>
       </div>
       <div class="query-result" id="queryResult">
         <div class="query-result-header">
@@ -652,6 +700,64 @@ body.dashboard-active .reset-btn{display:flex}
         <div class="query-result-body" id="queryResultBody"></div>
       </div>
     </section>
+
+    <!-- Rewards Reporting -->
+    <div id="rewardsReportingSection" class="rewards-reporting">
+      <div class="section-title">Rewards Reporting <span class="ai-indicator"><span class="ai-dot"></span> AI-Enhanced</span></div>
+      <div class="rewards-time-filters">
+        <button class="rewards-time-btn active" onclick="switchRewardsRange(30,this)">30 Days</button>
+        <button class="rewards-time-btn" onclick="switchRewardsRange(60,this)">60 Days</button>
+        <button class="rewards-time-btn" onclick="switchRewardsRange(90,this)">90 Days</button>
+        <button class="rewards-time-btn" onclick="showCustomRange(this)">Custom</button>
+      </div>
+      <div id="rewardsSummaryMetrics" class="rewards-summary-metrics"></div>
+      <div class="rewards-chart-wrap">
+        <svg id="rewardsAreaChart" class="rewards-chart-svg" viewBox="0 0 760 240"></svg>
+        <div id="rewardsChartTooltip" class="rewards-tooltip-ai"></div>
+      </div>
+      <button class="rewards-download-btn" onclick="downloadRewardsCSV()">&#11015; Download Rewards CSV</button>
+    </div>
+
+    <!-- AI Restaking Agent -->
+    <div id="restakeAgentSection" class="restake-agent">
+      <div class="restake-agent-card ai-border">
+        <div class="restake-header">
+          <div>
+            <div class="section-title" style="margin-bottom:0">
+              AI Restaking Agent
+              <span class="ai-indicator"><span class="ai-dot"></span> Autonomous</span>
+            </div>
+            <div style="font-size:.82rem;color:var(--text-dim);margin-top:4px">
+              Dynamically rebalances stake across validators to maximize rewards
+            </div>
+          </div>
+          <div class="restake-toggle-wrap">
+            <span style="font-size:.78rem;color:var(--text-dim);margin-right:8px" id="restakeToggleLabel">Disabled</span>
+            <button class="node-toggle" id="restakeToggle" onclick="toggleRestakeAgent()"></button>
+          </div>
+        </div>
+        <div class="restake-body" id="restakeBody">
+          <!-- Strategy Selection -->
+          <div style="margin-top:16px;margin-bottom:12px;font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Select Strategy</div>
+          <div class="restake-strategies" id="restakeStrategies"></div>
+          <!-- Live Metrics -->
+          <div id="restakeMetrics" class="restake-metrics" style="margin-top:16px"></div>
+          <!-- Current Allocation -->
+          <div style="margin-top:16px">
+            <div style="font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">Current AI Allocation</div>
+            <div id="restakeAllocation"></div>
+          </div>
+          <!-- Agent Activity Feed -->
+          <div style="margin-top:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <div style="font-size:.78rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Agent Activity</div>
+              <span id="restakeStatusBadge" class="card-badge badge-teal" style="display:none"><span class="restake-status-dot"></span> Live</span>
+            </div>
+            <div class="restake-activity" id="restakeActivity"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Anomaly Banner -->
     <div class="anomaly-banner" id="anomalyBanner" onclick="toggleAnomaly()">
@@ -798,12 +904,6 @@ body.dashboard-active .reset-btn{display:flex}
       <div class="activity-feed" id="activityFeed"></div>
     </div>
 
-    <!-- Report -->
-    <div class="section-title">Automated Reporting <span class="ai-indicator"><span class="ai-dot"></span> Zero-Touch</span></div>
-    <div class="report-section">
-      <button class="report-trigger" onclick="generateReport()"><span style="font-size:1.2rem">&#128202;</span> Generate Weekly Network Report <span style="margin-left:auto;font-size:.75rem;font-weight:400;color:var(--text-dim)">AI-powered &bull; ~2 seconds</span></button>
-      <div class="report-output" id="reportOutput"></div>
-    </div>
 
   </div>
 </div>
@@ -1085,6 +1185,12 @@ body.dashboard-active .reset-btn{display:flex}
     renderEpochHistory();
     renderActivityFeed();
     updateNodeCountBadge();
+    renderRewardsSummary(30);
+    drawRewardsChart(30);
+    renderRestakeStrategies();
+    renderRestakeMetrics();
+    renderRestakeAllocation();
+    renderRestakeActivity();
   }
 
   function updateNodeCountBadge() {
@@ -1235,6 +1341,318 @@ body.dashboard-active .reset-btn{display:flex}
     }, 200);
   }
 
+  /* ═══════════ REWARDS DATA & FUNCTIONS ═══════════ */
+  var rewardsData = (function () {
+    var arr = [], base = 1275, now = new Date();
+    for (var i = 89; i >= 0; i--) {
+      var d = new Date(now); d.setDate(d.getDate() - i);
+      var dayIndex = 90 - i;
+      var trend = dayIndex * 0.35;
+      var seasonal = Math.sin(dayIndex * 0.22) * 45;
+      var noise = (Math.random() - 0.5) * 30;
+      var rewards = Math.round((base + trend + seasonal + noise) * 100) / 100;
+      arr.push({
+        date: d,
+        dateStr: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        rewards: Math.max(1150, rewards),
+        epoch: 759 + dayIndex
+      });
+    }
+    return arr;
+  })();
+  var currentRewardsDays = 30;
+
+  /* ═══════════ AI RESTAKING AGENT ═══════════ */
+  var restakeAgentEnabled = false;
+  var restakeStrategy = 'balanced';
+  var restakeStrategies = {
+    maxYield: { name: 'Max Yield', desc: 'Aggressive rebalancing to chase highest APY validators', targetAPY: 9.1, risk: 'Higher', allocations: { collection: 15, consensus: 45, verification: 30, access: 10 } },
+    balanced: { name: 'Balanced', desc: 'Optimizes yield while maintaining diversification', targetAPY: 8.5, risk: 'Medium', allocations: { collection: 25, consensus: 30, verification: 25, access: 20 } },
+    conservative: { name: 'Conservative', desc: 'Prioritizes stability and uptime over maximum returns', targetAPY: 8.2, risk: 'Lower', allocations: { collection: 25, consensus: 25, verification: 25, access: 25 } }
+  };
+  var restakeActivityLog = [
+    { time: '2 min ago', text: 'Rebalanced <strong>45,000 FLOW</strong> from Access \u2192 Consensus (+0.3% APY)', ai: true },
+    { time: '8 min ago', text: 'Detected yield opportunity: Verification nodes APY spiked to <strong>8.7%</strong>', ai: true },
+    { time: '14 min ago', text: 'Moved <strong>22,000 FLOW</strong> to Verification to capture yield spike', ai: false },
+    { time: '27 min ago', text: 'Micro-rebalance: <strong>8,200 FLOW</strong> Collection \u2192 Consensus', ai: false },
+    { time: '45 min ago', text: 'Strategy validation: current allocation within <strong>2%</strong> of target', ai: true },
+    { time: '1h ago', text: 'Detected underperforming Access validator \u2014 redistributed <strong>15,000 FLOW</strong>', ai: true },
+    { time: '1h 20m ago', text: 'Epoch boundary rebalance: adjusted all positions for epoch 848', ai: false },
+    { time: '2h ago', text: 'Agent activated \u2014 initial allocation set to <strong>Balanced</strong> strategy', ai: true },
+    { time: '2h 15m ago', text: 'Risk assessment: all validators within acceptable slashing bounds', ai: true },
+    { time: '3h ago', text: 'Consensus APY trending up \u2014 increased allocation by <strong>5%</strong>', ai: false }
+  ];
+  var restakeInterval = null;
+  var restakeRebalanceCount = 7;
+
+  window.toggleRestakeAgent = function () {
+    restakeAgentEnabled = !restakeAgentEnabled;
+    var toggle = document.getElementById('restakeToggle');
+    var body = document.getElementById('restakeBody');
+    var label = document.getElementById('restakeToggleLabel');
+    var badge = document.getElementById('restakeStatusBadge');
+    if (restakeAgentEnabled) {
+      toggle.classList.add('on');
+      body.classList.add('active');
+      label.textContent = 'Active';
+      label.style.color = 'var(--accent-teal)';
+      badge.style.display = '';
+      restakeInterval = setInterval(simulateRestakeActivity, 30000);
+    } else {
+      toggle.classList.remove('on');
+      body.classList.remove('active');
+      label.textContent = 'Disabled';
+      label.style.color = 'var(--text-dim)';
+      badge.style.display = 'none';
+      if (restakeInterval) { clearInterval(restakeInterval); restakeInterval = null; }
+    }
+  };
+
+  function renderRestakeStrategies() {
+    var container = document.getElementById('restakeStrategies');
+    if (!container) return;
+    container.innerHTML = '';
+    var keys = ['maxYield', 'balanced', 'conservative'];
+    keys.forEach(function (key) {
+      var s = restakeStrategies[key];
+      var card = document.createElement('div');
+      card.className = 'restake-strategy' + (key === restakeStrategy ? ' selected' : '');
+      card.innerHTML =
+        '<div class="restake-strategy-name">' + s.name + '</div>' +
+        '<div class="restake-strategy-desc">' + s.desc + '</div>' +
+        '<div class="restake-strategy-yield">' + s.targetAPY.toFixed(1) + '% APY</div>' +
+        '<div class="restake-strategy-risk">Risk: ' + s.risk + '</div>';
+      card.addEventListener('click', function () { selectRestakeStrategy(key); });
+      container.appendChild(card);
+    });
+  }
+
+  window.selectRestakeStrategy = function (key) {
+    restakeStrategy = key;
+    renderRestakeStrategies();
+    renderRestakeMetrics();
+    renderRestakeAllocation();
+    var s = restakeStrategies[key];
+    restakeActivityLog.unshift({ time: 'Just now', text: 'Strategy changed to <strong>' + s.name + '</strong> \u2014 target APY ' + s.targetAPY.toFixed(1) + '%', ai: true });
+    renderRestakeActivity();
+  };
+
+  function renderRestakeMetrics() {
+    var el = document.getElementById('restakeMetrics');
+    if (!el) return;
+    var s = restakeStrategies[restakeStrategy];
+    var baseAPY = 8.2;
+    var uplift = (s.targetAPY - baseAPY).toFixed(1);
+    el.innerHTML =
+      '<div class="summary-item"><div class="summary-label">Projected APY</div><div class="summary-value" style="color:var(--accent-violet)">' + s.targetAPY.toFixed(1) + '%</div><div class="summary-sub">' + s.name + ' strategy</div></div>' +
+      '<div class="summary-item"><div class="summary-label">Current APY</div><div class="summary-value">' + baseAPY.toFixed(1) + '%</div><div class="summary-sub">Baseline rate</div></div>' +
+      '<div class="summary-item"><div class="summary-label">Yield Uplift</div><div class="summary-value" style="color:var(--accent-teal)">+' + uplift + '%</div><div class="summary-sub">vs. equal distribution</div></div>' +
+      '<div class="summary-item"><div class="summary-label">Rebalances Today</div><div class="summary-value">' + restakeRebalanceCount + '</div><div class="summary-sub">Autonomous actions</div></div>';
+  }
+
+  function renderRestakeAllocation() {
+    var container = document.getElementById('restakeAllocation');
+    if (!container) return;
+    container.innerHTML = '';
+    var s = restakeStrategies[restakeStrategy];
+    var total = 1250000;
+    var labels = { collection: 'Collection', consensus: 'Consensus', verification: 'Verification', access: 'Access' };
+    var colors = { collection: 'blue', consensus: 'teal', verification: 'gold', access: 'navy' };
+    var types = ['collection', 'consensus', 'verification', 'access'];
+    types.forEach(function (type) {
+      var pct = s.allocations[type];
+      var amount = Math.round(total * pct / 100);
+      var row = document.createElement('div');
+      row.className = 'staking-bar-row';
+      row.innerHTML =
+        '<span class="staking-bar-label">' + labels[type] + '</span>' +
+        '<div class="staking-bar-track"><div class="staking-bar-fill ' + colors[type] + '" style="width:' + pct + '%"></div></div>' +
+        '<span class="staking-bar-value">' + amount.toLocaleString() + ' FLOW (' + pct + '%)</span>';
+      container.appendChild(row);
+    });
+  }
+
+  function renderRestakeActivity() {
+    var container = document.getElementById('restakeActivity');
+    if (!container) return;
+    container.innerHTML = '';
+    var entries = restakeActivityLog.slice(0, 15);
+    entries.forEach(function (e) {
+      var entry = document.createElement('div');
+      entry.className = 'restake-activity-entry';
+      var tagHtml = e.ai ? '<span class="restake-activity-tag">AI</span>' : '';
+      entry.innerHTML =
+        '<span class="restake-activity-time">' + e.time + '</span>' +
+        '<span class="restake-activity-text">' + tagHtml + e.text + '</span>';
+      container.appendChild(entry);
+    });
+  }
+
+  function simulateRestakeActivity() {
+    var actions = [
+      'Micro-rebalance: <strong>' + (Math.floor(Math.random() * 15) + 3) + ',000 FLOW</strong> Collection \u2192 Consensus',
+      'Yield check: all validators within <strong>' + (Math.random() * 2 + 0.5).toFixed(1) + '%</strong> of target',
+      'Detected yield shift: Consensus APY now <strong>' + (8.0 + Math.random() * 0.8).toFixed(1) + '%</strong>',
+      'Rebalanced <strong>' + (Math.floor(Math.random() * 20) + 5) + ',000 FLOW</strong> to optimize epoch rewards',
+      'Validator health check: all nodes operational, <strong>0</strong> slashing events'
+    ];
+    var action = actions[Math.floor(Math.random() * actions.length)];
+    restakeActivityLog.unshift({ time: 'Just now', text: action, ai: Math.random() > 0.3 });
+    restakeRebalanceCount++;
+    renderRestakeActivity();
+    renderRestakeMetrics();
+  }
+
+  function renderRewardsSummary(days) {
+    var slice = rewardsData.slice(-days);
+    var total = 0, best = 0, bestDate = '';
+    slice.forEach(function (d) {
+      total += d.rewards;
+      if (d.rewards > best) { best = d.rewards; bestDate = d.dateStr; }
+    });
+    var avg = total / slice.length;
+    var last7 = rewardsData.slice(-7);
+    var prev7 = rewardsData.slice(-14, -7);
+    var avg7 = 0, avgP7 = 0;
+    last7.forEach(function (d) { avg7 += d.rewards; });
+    prev7.forEach(function (d) { avgP7 += d.rewards; });
+    avg7 /= 7; avgP7 /= 7;
+    var trendPct = ((avg7 - avgP7) / avgP7 * 100).toFixed(1);
+    var trendDir = trendPct >= 0 ? '\u25B2' : '\u25BC';
+    var trendColor = trendPct >= 0 ? 'var(--accent-teal)' : 'var(--accent-red)';
+    var el = document.getElementById('rewardsSummaryMetrics');
+    el.innerHTML =
+      '<div class="summary-item"><div class="summary-label">Total Earned</div><div class="summary-value" style="color:var(--accent-gold)">' + total.toLocaleString('en-US', {maximumFractionDigits:0}) + ' FLOW</div><div class="summary-sub">Last ' + days + ' days</div></div>' +
+      '<div class="summary-item"><div class="summary-label">Avg / Day</div><div class="summary-value">' + avg.toFixed(1) + ' FLOW</div><div class="summary-sub">Per day average</div></div>' +
+      '<div class="summary-item"><div class="summary-label">Best Day</div><div class="summary-value">' + best.toFixed(1) + ' FLOW</div><div class="summary-sub">' + bestDate + '</div></div>' +
+      '<div class="summary-item"><div class="summary-label">7-Day Trend</div><div class="summary-value" style="color:' + trendColor + '">' + trendDir + ' ' + Math.abs(trendPct) + '%</div><div class="summary-sub">vs. prior 7 days</div></div>';
+    currentRewardsDays = days;
+  }
+
+  function drawRewardsChart(days) {
+    var svg = document.getElementById('rewardsAreaChart');
+    if (!svg) return;
+    var slice = rewardsData.slice(-days);
+    var w = 760, h = 240, pad = 40, padR = 20, padB = 30;
+    var chartW = w - pad - padR, chartH = h - pad - padB;
+    var minVal = Infinity, maxVal = -Infinity;
+    slice.forEach(function (d) {
+      if (d.rewards < minVal) minVal = d.rewards;
+      if (d.rewards > maxVal) maxVal = d.rewards;
+    });
+    minVal = Math.floor(minVal / 50) * 50;
+    maxVal = Math.ceil(maxVal / 50) * 50;
+    if (maxVal === minVal) maxVal += 50;
+    function xPos(i) { return pad + (i / (slice.length - 1)) * chartW; }
+    function yPos(v) { return pad + (1 - (v - minVal) / (maxVal - minVal)) * chartH; }
+    var markup = '<defs><linearGradient id="rwGrad" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="rgba(245,213,71,.35)"/>' +
+      '<stop offset="100%" stop-color="rgba(245,213,71,.02)"/>' +
+      '</linearGradient></defs>';
+    // grid lines
+    var steps = 5;
+    for (var g = 0; g <= steps; g++) {
+      var val = minVal + (maxVal - minVal) * (g / steps);
+      var gy = yPos(val);
+      markup += '<line x1="' + pad + '" y1="' + gy + '" x2="' + (w - padR) + '" y2="' + gy + '" stroke="var(--border)" stroke-width="0.5" stroke-dasharray="4,4"/>';
+      markup += '<text x="' + (pad - 6) + '" y="' + (gy + 3) + '" text-anchor="end" fill="var(--text-muted)" font-size="10" font-family="var(--font-mono)">' + Math.round(val) + '</text>';
+    }
+    // x axis labels
+    var labelInterval = Math.max(1, Math.floor(slice.length / 6));
+    for (var xi = 0; xi < slice.length; xi += labelInterval) {
+      markup += '<text x="' + xPos(xi) + '" y="' + (h - 6) + '" text-anchor="middle" fill="var(--text-muted)" font-size="10" font-family="var(--font)">' + slice[xi].dateStr + '</text>';
+    }
+    // area path
+    var areaPath = 'M' + xPos(0) + ',' + yPos(slice[0].rewards);
+    for (var a = 1; a < slice.length; a++) areaPath += ' L' + xPos(a) + ',' + yPos(slice[a].rewards);
+    areaPath += ' L' + xPos(slice.length - 1) + ',' + (pad + chartH) + ' L' + xPos(0) + ',' + (pad + chartH) + ' Z';
+    markup += '<path d="' + areaPath + '" fill="url(#rwGrad)"/>';
+    // line path
+    var linePath = 'M' + xPos(0) + ',' + yPos(slice[0].rewards);
+    for (var b = 1; b < slice.length; b++) linePath += ' L' + xPos(b) + ',' + yPos(slice[b].rewards);
+    markup += '<path d="' + linePath + '" fill="none" stroke="var(--accent-gold)" stroke-width="2" stroke-linejoin="round"/>';
+    // hover line + dot (hidden, moved by JS)
+    markup += '<line id="rwHoverLine" x1="0" y1="' + pad + '" x2="0" y2="' + (pad + chartH) + '" stroke="var(--accent-gold)" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>';
+    markup += '<circle id="rwHoverDot" cx="0" cy="0" r="4" fill="var(--accent-gold)" stroke="var(--bg-surface)" stroke-width="2" opacity="0"/>';
+    // invisible hit area
+    markup += '<rect id="rwHitArea" x="' + pad + '" y="' + pad + '" width="' + chartW + '" height="' + chartH + '" fill="transparent" style="cursor:crosshair"/>';
+    svg.innerHTML = markup;
+    setupRewardsChartTooltip(slice, chartW, chartH, pad, padR, minVal, maxVal);
+  }
+
+  function setupRewardsChartTooltip(slice, chartW, chartH, pad, padR, minVal, maxVal) {
+    var hitArea = document.getElementById('rwHitArea');
+    var hoverLine = document.getElementById('rwHoverLine');
+    var hoverDot = document.getElementById('rwHoverDot');
+    var tooltip = document.getElementById('rewardsChartTooltip');
+    if (!hitArea) return;
+    function xPos(i) { return pad + (i / (slice.length - 1)) * chartW; }
+    function yPos(v) { return pad + (1 - (v - minVal) / (maxVal - minVal)) * chartH; }
+    hitArea.addEventListener('mousemove', function (e) {
+      var svg = document.getElementById('rewardsAreaChart');
+      var rect = svg.getBoundingClientRect();
+      var scaleX = 760 / rect.width;
+      var mx = (e.clientX - rect.left) * scaleX;
+      var idx = Math.round((mx - pad) / chartW * (slice.length - 1));
+      idx = Math.max(0, Math.min(slice.length - 1, idx));
+      var cx = xPos(idx), cy = yPos(slice[idx].rewards);
+      hoverLine.setAttribute('x1', cx);
+      hoverLine.setAttribute('x2', cx);
+      hoverLine.setAttribute('opacity', '1');
+      hoverDot.setAttribute('cx', cx);
+      hoverDot.setAttribute('cy', cy);
+      hoverDot.setAttribute('opacity', '1');
+      tooltip.innerHTML = '<strong>' + slice[idx].dateStr + '</strong><br>' +
+        '<span style="color:var(--accent-gold);font-weight:600">' + slice[idx].rewards.toFixed(1) + ' FLOW</span><br>' +
+        '<span style="color:var(--text-muted)">Epoch ' + slice[idx].epoch + '</span>';
+      tooltip.classList.add('visible');
+      var pxLeft = cx / 760 * rect.width;
+      tooltip.style.left = (pxLeft + 14) + 'px';
+      tooltip.style.top = (cy / 240 * rect.height - 20) + 'px';
+    });
+    hitArea.addEventListener('mouseleave', function () {
+      hoverLine.setAttribute('opacity', '0');
+      hoverDot.setAttribute('opacity', '0');
+      tooltip.classList.remove('visible');
+    });
+  }
+
+  window.switchRewardsRange = function (days, btn) {
+    document.querySelectorAll('.rewards-time-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderRewardsSummary(days);
+    drawRewardsChart(days);
+  };
+
+  window.showCustomRange = function (btn) {
+    var input = prompt('Enter number of days (1-90):', '45');
+    if (!input) return;
+    var days = parseInt(input, 10);
+    if (isNaN(days) || days < 1) days = 1;
+    if (days > 90) days = 90;
+    document.querySelectorAll('.rewards-time-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderRewardsSummary(days);
+    drawRewardsChart(days);
+  };
+
+  window.downloadRewardsCSV = function () {
+    var slice = rewardsData.slice(-currentRewardsDays);
+    var csv = 'Date,Epoch,Rewards (FLOW)\n';
+    slice.forEach(function (d) {
+      csv += d.date.toISOString().split('T')[0] + ',' + d.epoch + ',' + d.rewards.toFixed(2) + '\n';
+    });
+    var blob = new Blob([csv], { type: 'text/csv' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'flow-rewards-' + currentRewardsDays + 'days.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   /* ═══════════ AI FEATURES (from AI version) ═══════════ */
 
   /* Tab Switching */
@@ -1271,16 +1689,46 @@ body.dashboard-active .reset-btn{display:flex}
     var resultEl = document.getElementById('queryResult');
     var bodyEl = document.getElementById('queryResultBody');
     var html = '';
-    if (q.includes('scal') || q.includes('capacity') || q.includes('auto')) {
+    if (q.includes('restake') || q.includes('restaking') || q.includes('rebalance') || (q.includes('agent') && q.includes('perform'))) {
+      var s = restakeStrategies[restakeStrategy];
+      var statusText = restakeAgentEnabled ? '<span style="color:var(--accent-teal);font-weight:600">Active</span>' : '<span style="color:var(--text-muted);font-weight:600">Disabled</span>';
+      var recentEntries = restakeActivityLog.slice(0, 3);
+      var activityHtml = '<ul style="margin:6px 0 0 16px;color:var(--text-dim)">';
+      recentEntries.forEach(function (e) { activityHtml += '<li><span style="color:var(--text-muted);font-size:.78rem">' + e.time + '</span> \u2014 ' + e.text + '</li>'; });
+      activityHtml += '</ul>';
+      html = '<p style="margin-bottom:12px"><strong>AI Restaking Agent Status</strong></p>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0">' +
+        '<div style="background:rgba(124,58,237,.06);padding:12px;border-radius:8px;border:1px solid rgba(124,58,237,.15)"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Agent Status</div><div style="font-size:1.1rem;margin:4px 0">' + statusText + '</div></div>' +
+        '<div style="background:rgba(124,58,237,.06);padding:12px;border-radius:8px;border:1px solid rgba(124,58,237,.15)"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Strategy</div><div style="font-size:1.1rem;font-weight:700;color:var(--accent-violet);margin:4px 0">' + s.name + ' (' + s.targetAPY.toFixed(1) + '% APY)</div></div></div>' +
+        '<p style="margin-bottom:6px"><strong>Recent Activity:</strong></p>' + activityHtml +
+        '<p style="margin-top:10px;font-size:.82rem;color:var(--text-dim)">\u2699\uFE0F <a href="#" onclick="document.getElementById(\'restakeAgentSection\').scrollIntoView({behavior:\'smooth\'});closeQuery();return false;" style="color:var(--accent-violet)">Go to AI Restaking Agent section</a> to configure strategies and view full activity.</p>';
+    } else if (q.includes('scal') || q.includes('capacity') || q.includes('auto')) {
       html = '<p style="margin-bottom:12px"><strong>Node Auto-Scaling Analysis</strong></p><table><tr><th>Node Type</th><th>Capacity</th><th>Trend</th><th>Headroom</th><th>Action</th></tr><tr><td>Collection</td><td><span style="color:var(--accent-gold);font-weight:600">87%</span></td><td>+12% WoW</td><td>~18 days</td><td><span class="status-pill status-progress">Scale recommended</span></td></tr><tr><td>Consensus</td><td><span style="color:var(--accent-teal);font-weight:600">42%</span></td><td>+2% WoW</td><td>>90 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr><tr><td>Execution</td><td><span style="color:var(--accent-teal);font-weight:600">62%</span></td><td>+5% WoW</td><td>>60 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr><tr><td>Verification</td><td><span style="color:var(--accent-teal);font-weight:600">38%</span></td><td>+1% WoW</td><td>>120 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr><tr><td>Access</td><td><span style="color:var(--accent-teal);font-weight:600">45%</span></td><td>+8% WoW</td><td>>45 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr></table><p style="margin-top:10px;color:var(--text-dim);font-size:.82rem"><strong>Recommendation:</strong> Enable predictive auto-scaling for Collection nodes. ML model can provision 48h before threshold breach at ~$8K/mo.</p>';
     } else if (q.includes('predict') && q.includes('health')) {
       html = '<p style="margin-bottom:12px"><strong>7-Day Network Health Forecast</strong></p><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0"><div style="background:rgba(52,211,153,.06);padding:12px;border-radius:8px;border:1px solid rgba(52,211,153,.15)"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Overall Health</div><div style="font-size:1.3rem;font-weight:700;color:var(--accent-teal);margin:4px 0">94.2 / 100</div><div style="font-size:.78rem;color:var(--text-dim)">Confidence: 91%</div></div><div style="background:rgba(79,140,247,.06);padding:12px;border-radius:8px;border:1px solid rgba(79,140,247,.15)"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Predicted Uptime</div><div style="font-size:1.3rem;font-weight:700;color:var(--accent-blue);margin:4px 0">99.98%</div><div style="font-size:.78rem;color:var(--text-dim)">Confidence: 96%</div></div></div><p><strong>Key signals:</strong></p><ul style="margin:6px 0 0 16px;color:var(--text-dim)"><li>Consensus finality improving (2.8s \u2192 2.6s)</li><li>Collection node capacity primary concern \u2014 87%</li><li>No epoch boundary anomalies predicted</li><li>NBA Top Shot event on Day 4 may spike to 3,200+ tx/s</li></ul>';
     } else if (q.includes('risk') || q.includes('biggest')) {
       html = '<p style="margin-bottom:12px"><strong>Prioritized Risk Assessment</strong></p><div style="margin:10px 0;padding:14px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:.72rem;font-weight:700;color:var(--accent-red);text-transform:uppercase">&#9632; Critical</span><span style="font-size:.88rem;font-weight:600">Collection Node Capacity Exhaustion</span></div><p style="color:var(--text-dim)">At 87% with 12% WoW growth, capacity in ~18 days. Top Shot event risk before remediation.</p><p style="color:var(--text);margin-top:6px"><strong>Mitigation:</strong> Enable predictive auto-scaling or provision 4 nodes manually (3-day lead, ~$12K/mo).</p></div><div style="margin:10px 0;padding:14px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:.72rem;font-weight:700;color:var(--accent-gold);text-transform:uppercase">&#9632; Medium</span><span style="font-size:.88rem;font-weight:600">Access Node API Latency During Peak Events</span></div><p style="color:var(--text-dim)">P99 latency at 142ms (SLA: 200ms). During Top Shot events, predicted spike to 185ms. Sufficient headroom but worth monitoring.</p></div>';
+    } else if (q.includes('reward') || q.includes('earn') || q.includes('yield') || q.includes('download')) {
+      var rSlice = rewardsData.slice(-30);
+      var rTotal = 0;
+      rSlice.forEach(function (d) { rTotal += d.rewards; });
+      var last5 = rewardsData.slice(-5);
+      var miniTable = '<table style="margin:10px 0"><tr><th>Date</th><th>Epoch</th><th>Rewards</th></tr>';
+      last5.forEach(function (d) {
+        miniTable += '<tr><td>' + d.dateStr + '</td><td>' + d.epoch + '</td><td class="reward">' + d.rewards.toFixed(1) + ' FLOW</td></tr>';
+      });
+      miniTable += '</table>';
+      html = '<p style="margin-bottom:12px"><strong>Rewards Summary (Last 30 Days)</strong></p>' +
+        '<div style="background:rgba(245,213,71,.08);padding:14px;border-radius:8px;border:1px solid rgba(245,213,71,.2);margin-bottom:12px">' +
+        '<div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Total Earned (30d)</div>' +
+        '<div style="font-size:1.5rem;font-weight:700;color:var(--accent-gold);margin:4px 0">' + rTotal.toLocaleString('en-US', {maximumFractionDigits:0}) + ' FLOW</div>' +
+        '<div style="font-size:.78rem;color:var(--text-dim)">Avg ' + (rTotal / 30).toFixed(1) + ' FLOW/day</div></div>' +
+        '<p style="margin-bottom:6px"><strong>Last 5 Days:</strong></p>' + miniTable +
+        '<p style="margin-top:10px;font-size:.82rem;color:var(--text-dim)">\uD83D\uDCCA <a href="#" onclick="document.getElementById(\'rewardsReportingSection\').scrollIntoView({behavior:\'smooth\'});closeQuery();return false;" style="color:var(--accent-blue)">Visit the Rewards Reporting section</a> for the full chart, time filters, and CSV download.</p>';
     } else if (q.includes('report') || q.includes('weekly') || q.includes('generate')) {
       generateReport(); return;
     } else {
-      html = '<p>I can help with questions about your Flow network. Try asking about:</p><ul style="margin:10px 0 0 16px;color:var(--text-dim)"><li>Node auto-scaling suggestions</li><li>Network health predictions</li><li>Risk assessment</li><li>Generating reports</li><li>Node performance and capacity</li><li>Staking metrics and yield</li></ul>';
+      html = '<p>I can help with questions about your Flow network. Try asking about:</p><ul style="margin:10px 0 0 16px;color:var(--text-dim)"><li>Node auto-scaling suggestions</li><li>Network health predictions</li><li>Risk assessment</li><li>Rewards history and CSV export</li><li>Generating reports</li><li>Node performance and capacity</li><li>Staking metrics and yield</li><li>AI restaking agent status</li></ul>';
     }
     bodyEl.innerHTML = html;
     resultEl.classList.add('visible');
@@ -1370,47 +1818,9 @@ body.dashboard-active .reset-btn{display:flex}
 
   /* Report Generator */
   window.generateReport = function () {
-    var el = document.getElementById('reportOutput');
     closeQuery();
-    var lines = [
-      { type: 'h3', text: 'Flow Network Status Report \u2014 Auto-generated' },
-      { type: 'date', text: 'Generated: ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) },
-      { type: 'section', text: 'Key Performance Metrics' },
-      { type: 'metric', label: 'Network Uptime', value: '99.99%' },
-      { type: 'metric', label: 'Total Staked', value: '245.8M FLOW (+2.1M WoW)' },
-      { type: 'metric', label: 'Annual Rewards Rate', value: '8.2% (predicted: 8.4%)' },
-      { type: 'metric', label: 'Active Validators', value: '281 (+8 this epoch)' },
-      { type: 'section', text: 'Node Capacity Forecast' },
-      { type: 'metric', label: 'Collection', value: '87% \u2014 scale within 18d' },
-      { type: 'metric', label: 'Consensus', value: '42% \u2014 healthy (>90d headroom)' },
-      { type: 'metric', label: 'Execution', value: '62% \u2014 healthy (>60d headroom)' },
-      { type: 'metric', label: 'Verification', value: '38% \u2014 healthy (>120d headroom)' },
-      { type: 'metric', label: 'Access', value: '45% \u2014 healthy (>45d headroom)' },
-      { type: 'section', text: 'AI-Flagged Anomalies' },
-      { type: 'para', text: '\u26a1 <strong>Coinbase Custody volume spike</strong> \u2014 2.3\u03c3 above baseline. Attributed to NBA Top Shot. Normalizing in 4-6h.' },
-      { type: 'para', text: '\u26a0\ufe0f <strong>Collection node capacity at 87%</strong> \u2014 trending to threshold in 18 days. Predictive auto-scaling recommended.' },
-      { type: 'section', text: 'AI Recommendations' },
-      { type: 'para', text: '<strong>1.</strong> Enable predictive auto-scaling for Collection nodes \u2014 zero-downtime, ~$8K/mo.' },
-      { type: 'para', text: '<strong>2.</strong> Optimize rewards via dynamic delegation \u2014 8.2% \u2192 8.5% APY.' },
-      { type: 'para', text: '<strong>3.</strong> Monitor Access node latency ahead of Mar 15 Top Shot event.' },
-      { type: 'note', text: '\u26a1 Auto-generated from network telemetry \u2014 previously required 4+ hours of manual compilation' }
-    ];
-    el.innerHTML = '';
-    el.classList.add('visible');
-    var delay = 0;
-    lines.forEach(function (line) {
-      var div = document.createElement('div');
-      div.className = 'report-line';
-      if (line.type === 'h3') div.innerHTML = '<h3>' + line.text + '</h3>';
-      else if (line.type === 'date') div.innerHTML = '<div style="color:var(--text-muted);font-size:.78rem;margin-bottom:8px">' + line.text + '</div>';
-      else if (line.type === 'section') div.innerHTML = '<div class="report-section-title">' + line.text + '</div>';
-      else if (line.type === 'metric') div.innerHTML = '<div class="report-metric"><span>' + line.label + '</span><span class="val">' + line.value + '</span></div>';
-      else if (line.type === 'para') div.innerHTML = '<p style="margin:4px 0;color:var(--text-dim)">' + line.text + '</p>';
-      else if (line.type === 'note') div.innerHTML = '<div class="report-note"><span style="flex-shrink:0">\u26a1</span> ' + line.text.replace('\u26a1 ', '') + '</div>';
-      el.appendChild(div);
-      delay += 60;
-      setTimeout(function (d) { d.classList.add('visible'); }.bind(null, div), delay);
-    });
+    var el = document.getElementById('rewardsReportingSection');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   /* ═══════════ RESET ═══════════ */
