@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bison Trails.ai — AI-Enhanced Validator Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0A0E1A;--bg-surface:#0F1528;--card:rgba(15,25,50,0.6);--card-hover:rgba(20,32,65,0.7);
+  --accent-blue:#4F8CF7;--accent-teal:#34D399;--accent-gold:#FBBF24;--accent-red:#F87171;
+  --accent-violet:#A78BFA;--accent-cyan:#22D3EE;
+  --border:rgba(79,140,247,0.12);--glass-border:rgba(255,255,255,0.06);
+  --text:#E2E8F0;--text-dim:#94A3B8;--text-muted:#475569;
+  --shadow:0 1px 3px rgba(0,0,0,0.3);--shadow-lg:0 4px 12px rgba(0,0,0,0.4);
+  --radius:8px;--radius-lg:12px;--radius-sm:8px;--transition:0.2s ease;
+  --font:'Outfit',sans-serif;--font-display:'Sora',sans-serif;--font-mono:'JetBrains Mono',monospace;
+}
+
+html{font-size:14px;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;overflow-x:hidden;position:relative;letter-spacing:-0.02em}
+
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* ── Keyframes ─────────────────────────────────────── */
+@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(167,139,250,.45)}70%{box-shadow:0 0 0 8px rgba(167,139,250,0)}100%{box-shadow:0 0 0 0 rgba(167,139,250,0)}}
+@keyframes slide-down{from{opacity:0;max-height:0;transform:translateY(-8px)}to{opacity:1;max-height:2000px;transform:translateY(0)}}
+@keyframes fade-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes stepFadeIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeInUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes breathe{0%,100%{opacity:.6;transform:scale(1)}50%{opacity:1;transform:scale(1.3)}}
+@keyframes mesh-shift{0%,100%{transform:translate(0,0)}50%{transform:translate(-20px,10px)}}
+@keyframes card-reveal{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@property --angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes rotate-border{to{--angle:360deg}}
+
+/* ── Background Atmosphere ────────────────────────── */
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 10% 10%,rgba(79,140,247,.12),transparent),
+    radial-gradient(ellipse 60% 50% at 80% 40%,rgba(167,139,250,.1),transparent),
+    radial-gradient(ellipse 70% 50% at 30% 90%,rgba(34,211,238,.08),transparent);
+  animation:mesh-shift 20s ease-in-out infinite alternate}
+.bg-grain{position:fixed;inset:0;z-index:0;pointer-events:none}
+.bg-grain::after{content:'';position:absolute;inset:0;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:128px 128px}
+
+/* ── AI Indicator (replaces ai-indicator) ─────────────── */
+.ai-indicator{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:600;padding:2px 10px;border-radius:99px;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);color:var(--accent-violet);letter-spacing:.3px}
+.ai-dot{width:6px;height:6px;border-radius:50%;background:linear-gradient(135deg,var(--accent-violet),var(--accent-cyan));animation:breathe 2s ease-in-out infinite;flex-shrink:0}
+.ai-shimmer{background:linear-gradient(90deg,transparent,rgba(167,139,250,.08),transparent);background-size:200% 100%;animation:shimmer 3s linear infinite}
+
+/* ── AI Gradient Border ───────────────────────────── */
+.ai-border{position:relative}
+.ai-border::before{content:'';position:absolute;inset:-1px;background:conic-gradient(from var(--angle),var(--accent-violet),var(--accent-cyan),var(--accent-blue),var(--accent-violet));border-radius:inherit;animation:rotate-border 4s linear infinite;z-index:-1;opacity:0.4}
+
+/* ── Header ────────────────────────────────────────── */
+.header{background:rgba(15,25,50,0.7);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--glass-border);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.header-left{display:flex;align-items:center;gap:32px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text)}
+.logo svg{width:28px;height:28px;flex-shrink:0}
+.logo-text{font-family:var(--font-display);font-weight:700;font-size:16px;letter-spacing:-.3px;color:var(--text)}
+.header-nav{display:flex;gap:0}
+.header-nav a{color:var(--text-dim);text-decoration:none;padding:16px 14px;font-size:12px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;transition:color var(--transition);border-bottom:2px solid transparent;margin-bottom:-1px}
+.header-nav a:hover{color:var(--text)}
+.header-nav a.active{color:var(--accent-blue);border-bottom-color:var(--accent-blue)}
+.header-right{display:flex;align-items:center;gap:16px}
+.btn-login{font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:6px;padding:6px 16px;cursor:pointer;transition:all var(--transition)}
+.btn-login:hover{border-color:var(--text-dim);color:var(--text)}
+.reset-btn{display:none;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:6px;padding:5px 12px;cursor:pointer;transition:all var(--transition)}
+.reset-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+.reset-btn kbd{font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:1px 4px;font-family:inherit;color:var(--text-muted);margin-left:4px}
+
+/* ── View Toggle ───────────────────────────────────── */
+#wizard-view{display:block;position:relative;z-index:1}
+#dashboard-view{display:none;position:relative;z-index:1}
+body.dashboard-active #wizard-view{display:none}
+body.dashboard-active #dashboard-view{display:block}
+body.dashboard-active .reset-btn{display:flex}
+
+/* ── Wizard ────────────────────────────────────────── */
+.wizard{max-width:900px;margin:0 auto;padding:40px 24px 80px}
+.wizard-header{margin-bottom:36px}
+.wizard-header h1{font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--text);margin-bottom:6px}
+.wizard-header p{font-size:15px;color:var(--text-dim)}
+.step-labels{display:flex;gap:32px;margin-bottom:36px}
+.step-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);transition:color .3s ease}
+.step-label.active{color:var(--accent-blue);border-bottom:2px solid transparent;background-image:linear-gradient(var(--bg),var(--bg)),linear-gradient(90deg,var(--accent-violet),var(--accent-cyan));background-origin:border-box;background-clip:padding-box,border-box;padding-bottom:4px}
+.step-label.completed{color:var(--accent-teal)}
+.step{display:none;animation:stepFadeIn .35s ease}
+.step.active{display:block}
+.step-title{font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:4px}
+.step-subtitle{font-size:14px;color:var(--text-dim);margin-bottom:24px;line-height:1.6}
+
+/* Network Select */
+.network-select{width:100%;padding:12px 16px;font-size:15px;font-family:inherit;background:var(--card);color:var(--text);border:2px solid var(--border);border-radius:var(--radius-lg);appearance:none;-webkit-appearance:none;cursor:pointer;transition:border-color .2s,box-shadow .2s;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394A3B8' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+.network-select:focus{outline:none;border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(79,140,247,.15)}
+.network-select option{background:var(--card);color:var(--text)}
+.network-select option:disabled{color:var(--text-muted)}
+
+/* AI Inline Recommendations (wizard) */
+.ai-recommendation-inline{margin-top:16px;padding:14px 18px;background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.15);border-radius:var(--radius);font-size:.85rem;color:var(--text-dim);line-height:1.6;display:flex;align-items:flex-start;gap:10px;position:relative;overflow:hidden}
+.ai-recommendation-inline::before{content:'';position:absolute;inset:-1px;background:conic-gradient(from var(--angle),var(--accent-violet),var(--accent-cyan),var(--accent-blue),var(--accent-violet));border-radius:inherit;animation:rotate-border 4s linear infinite;z-index:-1;opacity:0.25}
+.ai-recommendation-inline .ai-dot-inline{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--accent-violet),var(--accent-cyan));animation:breathe 2s ease-in-out infinite;flex-shrink:0;margin-top:4px}
+.ai-node-suggestion{margin-top:12px;padding:12px 16px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.2);border-radius:var(--radius);font-size:.82rem;color:var(--text-dim);display:flex;align-items:flex-start;gap:8px}
+.ai-node-suggestion .ai-dot-inline{width:8px;height:8px;border-radius:50%;background:linear-gradient(135deg,var(--accent-violet),var(--accent-cyan));animation:breathe 2s ease-in-out infinite;flex-shrink:0;margin-top:3px}
+.ai-preflight{margin-top:20px;padding:18px;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);position:relative;overflow:hidden}
+.ai-preflight::before{content:'';position:absolute;inset:-1px;background:conic-gradient(from var(--angle),var(--accent-violet),var(--accent-cyan),var(--accent-blue),var(--accent-violet));border-radius:inherit;animation:rotate-border 4s linear infinite;z-index:-1;opacity:0.3}
+.ai-preflight h4{font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--accent-blue);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.ai-preflight-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ai-preflight-item{padding:12px;background:var(--bg);border-radius:var(--radius);text-align:center}
+.ai-preflight-item .pf-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.ai-preflight-item .pf-value{font-family:var(--font-mono);font-size:1.3rem;font-weight:700}
+
+/* Provider Cards */
+.provider-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.provider-card{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius-lg);padding:28px 20px;cursor:pointer;transition:all .2s;text-align:center}
+.provider-card:hover{border-color:rgba(167,139,250,.3);box-shadow:0 0 20px rgba(167,139,250,.08)}
+.provider-card.selected{border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(79,140,247,.15)}
+.provider-icon{font-size:32px;margin-bottom:12px}
+.provider-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.provider-detail{font-size:13px;color:var(--text-dim)}
+.provider-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;background:rgba(79,140,247,.12);color:var(--accent-blue);margin-top:8px;text-transform:uppercase;letter-spacing:.3px}
+
+/* Region List */
+.region-list{display:flex;flex-direction:column;gap:8px}
+.region-item{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:14px 18px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between}
+.region-item:hover{border-color:rgba(167,139,250,.3)}
+.region-item.selected{border-color:var(--accent-blue);background:rgba(79,140,247,.05)}
+.region-left{display:flex;align-items:center;gap:12px}
+.region-code{font-size:13px;font-weight:700;font-family:var(--font-mono);color:var(--text)}
+.region-name{font-size:13px;color:var(--text-dim)}
+.region-latency{font-size:12px;font-weight:500;color:var(--accent-teal)}
+
+/* Pipeline */
+.pipeline{display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:24px;flex-wrap:wrap}
+.pipeline-node{font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;background:var(--card);backdrop-filter:blur(8px);border:1px solid var(--glass-border);color:var(--text-dim);transition:all .3s}
+.pipeline-node.enabled{background:var(--accent-blue);border-color:var(--accent-blue);color:white;box-shadow:0 0 12px rgba(79,140,247,.3)}
+.pipeline-arrow{font-size:14px;color:var(--text-muted)}
+
+/* Node Config */
+.node-config-grid{display:flex;flex-direction:column;gap:10px}
+.node-config-card{background:var(--card);border:2px solid var(--border);border-radius:var(--radius);padding:16px 20px;display:grid;grid-template-columns:40px 1fr auto;align-items:center;gap:16px;transition:all .2s}
+.node-config-card.enabled{border-color:var(--accent-blue)}
+.node-toggle{width:40px;height:22px;border-radius:11px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.node-toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+.node-toggle.on{background:var(--accent-blue)}
+.node-toggle.on::after{transform:translateX(18px)}
+.node-config-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.node-config-info p{font-size:12px;color:var(--text-dim)}
+.node-config-info .node-resources{font-size:11px;color:var(--text-muted);margin-top:2px}
+.node-config-controls{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.node-count-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:16px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}
+.node-count-btn:hover{border-color:var(--accent-blue);color:var(--accent-blue)}
+.node-count-value{font-family:var(--font-mono);font-size:18px;font-weight:700;min-width:24px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* Review */
+.review-grid{display:flex;flex-direction:column;gap:12px}
+.review-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px}
+.review-section h4{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);margin-bottom:8px}
+.review-value{font-size:15px;font-weight:600;margin-bottom:2px}
+.review-detail{font-size:13px;color:var(--text-dim)}
+.review-nodes-list{display:flex;flex-direction:column;gap:6px}
+.review-node-item{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)}
+.review-node-item:last-child{border-bottom:none}
+
+/* Wizard Nav */
+.wizard-nav{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:20px;border-top:1px solid var(--border)}
+.btn{padding:10px 24px;border-radius:var(--radius);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all var(--transition);display:inline-flex;align-items:center;gap:6px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-secondary{background:var(--bg-surface);color:var(--text-dim);border:1px solid var(--border)}
+.btn-secondary:hover:not(:disabled){border-color:var(--text-dim);color:var(--text)}
+.btn-primary{background:var(--accent-blue);color:white}
+.btn-primary:hover:not(:disabled){background:#3B7AE8}
+.btn-deploy{background:var(--accent-teal);color:white;font-size:16px;padding:14px 40px;width:100%;justify-content:center}
+.btn-deploy:hover:not(:disabled){background:#26b89d}
+
+/* ── Deploy Overlay ────────────────────────────────── */
+.deploy-overlay{position:fixed;inset:0;background:rgba(10,14,26,.97);z-index:1000;display:none;align-items:center;justify-content:center;flex-direction:column;gap:24px;opacity:0;transition:opacity .4s}
+.deploy-overlay.show{display:flex;opacity:1}
+.deploy-overlay h2{font-family:var(--font-display);color:white;font-size:24px;margin-bottom:8px}
+.deploy-steps{display:flex;flex-direction:column;gap:12px;min-width:400px}
+.deploy-step{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.3);font-size:15px;transition:all .4s}
+.deploy-step.active{color:rgba(255,255,255,.7)}
+.deploy-step.done{color:var(--accent-teal)}
+.deploy-step.done.ai-step{color:var(--accent-blue)}
+.deploy-check{width:22px;height:22px;border-radius:50%;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .3s}
+.deploy-step.active .deploy-check{border-color:rgba(255,255,255,.5)}
+.deploy-step.done .deploy-check{border-color:var(--accent-teal);background:var(--accent-teal);color:white}
+.deploy-step.done.ai-step .deploy-check{border-color:var(--accent-blue);background:var(--accent-blue)}
+.deploy-spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
+
+/* ── Dashboard ─────────────────────────────────────── */
+.dashboard{max-width:1400px;padding:24px;margin:0 auto}
+.dash-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.dash-header-left{display:flex;align-items:center;gap:16px}
+.dash-header h1{font-family:var(--font-display);font-size:22px;font-weight:700}
+.network-badge{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent-teal);background:rgba(52,211,153,.1);padding:4px 12px;border-radius:20px}
+.network-badge .dot{width:7px;height:7px;background:var(--accent-teal);border-radius:50%;animation:pulse-dot 2s infinite}
+.dash-stats{display:flex;gap:24px}
+.dash-stat{text-align:right}
+.dash-stat-value{font-family:var(--font-mono);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.dash-stat-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px}
+
+/* Cards */
+.card{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:20px;margin-bottom:20px;border:1px solid var(--glass-border);transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:rgba(255,255,255,0.1);box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-family:var(--font-display);font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px}
+.card-badge{font-size:11px;padding:2px 10px;border-radius:10px;font-weight:600}
+.badge-teal{background:rgba(52,211,153,.12);color:var(--accent-teal)}
+.badge-blue{background:rgba(79,140,247,.12);color:var(--accent-blue)}
+.badge-gold{background:rgba(251,191,36,.12);color:var(--accent-gold)}
+
+/* Node Table */
+.node-table{width:100%;border-collapse:collapse}
+.node-table th{text-align:left;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 12px;border-bottom:1px solid var(--border)}
+.node-table td{font-family:var(--font-mono);padding:14px 12px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+.node-table tr:last-child td{border-bottom:none}
+.node-table tr{cursor:pointer;transition:background var(--transition)}
+.node-table tbody tr:hover{background:var(--card-hover)}
+.node-type-name{font-weight:600;display:flex;align-items:center;gap:8px}
+.node-type-dot{width:8px;height:8px;border-radius:50%;background:var(--accent-teal);flex-shrink:0}
+.node-role-text{font-size:12px;color:var(--text-dim)}
+.uptime-value{font-weight:600;font-variant-numeric:tabular-nums;color:var(--accent-teal)}
+.ai-inline-prediction{font-size:.78rem;color:var(--accent-violet);display:flex;align-items:center;gap:6px}
+.ai-inline-prediction .ai-dot{width:5px;height:5px}
+.node-expand-row{display:none}
+.node-expand-row.show{display:table-row}
+.node-expand-row td{padding:0 12px 14px;border-bottom:1px solid var(--border)}
+.node-detail-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;background:var(--bg);border-radius:var(--radius);padding:14px 16px}
+.node-detail-item .ndi-label{font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+.node-detail-item .ndi-value{font-size:13px;font-weight:600;margin-top:2px}
+
+/* NLP Query */
+.query-section{margin-bottom:24px}
+.query-bar{position:relative}
+.query-bar input{width:100%;padding:16px 54px 16px 48px;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);color:var(--text);font-size:1rem;font-family:var(--font);transition:border-color .2s,box-shadow .2s;outline:none}
+.query-bar input:focus{border-color:var(--accent-blue);box-shadow:0 0 0 3px rgba(79,140,247,.15)}
+.query-bar input::placeholder{color:var(--text-muted)}
+.query-bar .search-icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:1.1rem;pointer-events:none}
+.query-bar .submit-btn{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--accent-blue);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.query-bar .submit-btn:hover{background:#3B7AE8}
+.query-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.query-chips button{background:rgba(167,139,250,.08);border:1px solid rgba(167,139,250,.2);color:var(--accent-violet);padding:6px 14px;border-radius:99px;font-size:.78rem;cursor:pointer;font-family:var(--font);transition:all .2s}
+.query-chips button:hover{background:rgba(167,139,250,.18);border-color:var(--accent-violet)}
+.query-result{margin-top:16px;background:var(--card);backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;display:none}
+.query-result.visible{display:block;animation:slide-down .4s ease}
+.query-result-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(167,139,250,.05)}
+.query-result-body{padding:20px;font-size:.88rem;line-height:1.7}
+.query-result-body table{width:100%;border-collapse:collapse;margin:10px 0}
+.query-result-body th{text-align:left;color:var(--text-dim);font-weight:600;padding:8px 12px;border-bottom:1px solid var(--border);font-size:.78rem;text-transform:uppercase;letter-spacing:.5px}
+.query-result-body td{padding:8px 12px;border-bottom:1px solid rgba(30,48,85,.5)}
+.query-result-body .status-pill{padding:2px 10px;border-radius:99px;font-size:.75rem;font-weight:600}
+.status-complete{background:rgba(52,211,153,.15);color:var(--accent-teal)}
+.status-progress{background:rgba(251,191,36,.15);color:var(--accent-gold)}
+.status-pending{background:rgba(248,113,113,.15);color:var(--accent-red)}
+.status-delayed{background:rgba(248,113,113,.15);color:var(--accent-red)}
+.query-close{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;padding:4px}
+
+/* Anomaly Banner */
+.anomaly-banner{background:linear-gradient(135deg,rgba(251,191,36,.06),rgba(251,191,36,.02));backdrop-filter:blur(12px);border:1px solid rgba(251,191,36,.2);border-radius:var(--radius);margin-bottom:24px;cursor:pointer;overflow:hidden;transition:all .3s}
+.anomaly-banner:hover{border-color:rgba(251,191,36,.5)}
+.anomaly-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px}
+.anomaly-header .left{display:flex;align-items:center;gap:10px}
+.anomaly-header .icon{font-size:1.1rem;animation:breathe 2s ease-in-out infinite}
+.anomaly-header .label{font-weight:600;color:var(--accent-gold);font-size:.9rem}
+.anomaly-header .badge{font-size:.7rem;background:rgba(251,191,36,.15);color:var(--accent-gold);padding:2px 8px;border-radius:99px}
+.anomaly-header .chevron{color:var(--text-muted);transition:transform .3s;font-size:.9rem}
+.anomaly-banner.expanded .chevron{transform:rotate(180deg)}
+.anomaly-details{max-height:0;overflow:hidden;transition:max-height .4s ease,padding .3s}
+.anomaly-banner.expanded .anomaly-details{max-height:300px;padding:0 20px 16px}
+.anomaly-details .detail-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:8px}
+.anomaly-details .detail-item{background:rgba(251,191,36,.05);border-radius:var(--radius-sm);padding:12px}
+.anomaly-details .detail-item .label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.anomaly-details .detail-item .value{font-size:.88rem;color:var(--text)}
+
+/* Node Tabs */
+.node-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--card);backdrop-filter:blur(12px);border-radius:var(--radius);padding:4px;border:1px solid var(--glass-border)}
+.node-tab{flex:1;padding:10px 12px;border-radius:var(--radius-sm);border:none;background:transparent;color:var(--text-dim);cursor:pointer;font-family:var(--font);font-size:.82rem;font-weight:500;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.node-tab:hover{color:var(--text);background:rgba(79,140,247,.05)}
+.node-tab.active{background:rgba(79,140,247,.15);color:var(--accent-blue);font-weight:600}
+.node-tab .health-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.node-content{display:none;animation:fade-in .3s ease}
+.node-content.active{display:block}
+.node-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.metric-card{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px;transition:border-color .2s,transform .15s}
+.metric-card:hover{border-color:rgba(167,139,250,.2);transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.metric-card .metric-label{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.metric-card .metric-value{font-family:var(--font-mono);font-size:1.6rem;font-weight:700;color:var(--text)}
+.metric-card .metric-sub{font-size:.78rem;color:var(--text-dim);margin-top:4px;display:flex;align-items:center;gap:6px}
+.metric-card .ai-prediction{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:.78rem;color:var(--accent-violet);display:flex;align-items:center;gap:6px}
+.metric-card .ai-prediction .ai-dot{width:5px;height:5px}
+
+/* Two Column + Staking Bars */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+.two-col .card{margin-bottom:0}
+.staking-bars{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.staking-bar-row{display:flex;align-items:center;gap:12px}
+.staking-bar-label{font-size:12px;font-weight:600;min-width:90px}
+.staking-bar-track{flex:1;height:24px;background:var(--bg);border-radius:4px;overflow:hidden;position:relative}
+.staking-bar-fill{height:100%;border-radius:4px;transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0}
+.staking-bar-fill.blue{background:var(--accent-blue)}
+.staking-bar-fill.teal{background:var(--accent-teal)}
+.staking-bar-fill.gold{background:var(--accent-gold)}
+.staking-bar-fill.navy{background:#64748B}
+.staking-bar-value{font-size:12px;font-weight:600;min-width:80px;text-align:right;font-variant-numeric:tabular-nums}
+.staking-bar-ai{font-size:.75rem;color:var(--accent-violet);margin-left:102px;margin-top:-4px;display:flex;align-items:center;gap:5px}
+.staking-bar-ai .ai-dot{width:5px;height:5px}
+.staking-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;border-top:1px solid var(--border)}
+.staking-total-label{font-size:13px;color:var(--text-dim)}
+.staking-total-value{font-family:var(--font-mono);font-size:20px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Network Summary */
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.summary-item{padding:12px 14px;background:var(--bg);border-radius:var(--radius)}
+.summary-item-value{font-family:var(--font-mono);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums;margin-bottom:2px}
+.summary-item-value.gold{color:var(--accent-gold)}
+.summary-item-value.teal{color:var(--accent-teal)}
+.summary-item-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.3px}
+
+/* Grid Layouts */
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-bottom:24px}
+.section-title{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.section-title .ai-indicator{font-size:.65rem}
+
+/* Chart */
+.chart-panel{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:24px}
+.chart-controls{display:flex;gap:4px;margin-bottom:16px}
+.chart-btn{padding:6px 16px;border-radius:99px;border:1px solid var(--border);background:transparent;color:var(--text-dim);cursor:pointer;font-size:.78rem;font-family:var(--font);transition:all .2s}
+.chart-btn.active{background:var(--accent-blue);color:#fff;border-color:var(--accent-blue)}
+.chart-btn:hover:not(.active){border-color:var(--accent-blue);color:var(--accent-blue)}
+.chart-svg{width:100%;height:220px}
+.chart-tooltip{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:.78rem;pointer-events:none;opacity:0;transition:opacity .15s;z-index:50;white-space:nowrap}
+
+/* Rec Cards */
+.rec-card{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);overflow:hidden;transition:border-color .2s}
+.rec-card:hover{border-color:rgba(167,139,250,.2)}
+.rec-card-header{padding:16px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rec-card-header .rec-type{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:99px}
+.rec-type-suggest{background:rgba(52,211,153,.12);color:var(--accent-teal)}
+.rec-type-opportunity{background:rgba(79,140,247,.12);color:var(--accent-blue)}
+.rec-type-risk{background:rgba(248,113,113,.12);color:var(--accent-red)}
+.rec-card-header h3{font-family:var(--font-display);font-size:.9rem;font-weight:600;margin-top:6px;line-height:1.4}
+.rec-card-header .confidence{font-size:.7rem;color:var(--text-muted);white-space:nowrap;margin-top:6px}
+.rec-card-actions{padding:0 18px 14px;display:flex;gap:8px}
+.rec-card-actions button{padding:6px 14px;border-radius:var(--radius-sm);border:1px solid var(--border);background:rgba(79,140,247,.08);color:var(--accent-blue);cursor:pointer;font-size:.78rem;font-family:var(--font);transition:all .2s}
+.rec-card-actions button:hover{background:rgba(79,140,247,.18);border-color:var(--accent-blue)}
+.rec-card-details{max-height:0;overflow:hidden;transition:max-height .4s ease}
+.rec-card.expanded .rec-card-details{max-height:500px}
+.rec-card-details-inner{padding:0 18px 18px;border-top:1px solid var(--border);padding-top:14px;font-size:.84rem;line-height:1.7;color:var(--text-dim)}
+.rec-card-details-inner .factor{display:flex;align-items:center;gap:8px;margin:6px 0}
+.rec-card-details-inner .factor-bar{width:80px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.rec-card-details-inner .factor-bar-fill{height:100%;border-radius:3px}
+
+/* Epoch Table */
+.epoch-table{width:100%;border-collapse:collapse}
+.epoch-table th{text-align:left;font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--border)}
+.epoch-table td{font-family:var(--font-mono);padding:10px;font-size:13px;border-bottom:1px solid var(--border);font-variant-numeric:tabular-nums}
+.epoch-table tr:last-child td{border-bottom:none}
+.epoch-table .reward{color:var(--accent-gold);font-weight:600}
+.epoch-table .uptime{color:var(--accent-teal);font-weight:600}
+.epoch-table tr.ai-flagged{background:rgba(251,191,36,.06)}
+.epoch-table .ai-annotation{font-size:.75rem;color:var(--accent-violet);display:flex;align-items:center;gap:5px}
+.epoch-table .ai-annotation .ai-dot{width:5px;height:5px}
+
+/* Staking Metrics */
+.staking-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px}
+.staking-card{background:var(--card);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid var(--glass-border);border-radius:var(--radius);padding:18px;text-align:center;transition:border-color .2s}
+.staking-card:hover{border-color:rgba(167,139,250,.2)}
+.staking-card .s-label{font-size:.7rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px}
+.staking-card .s-value{font-family:var(--font-mono);font-size:1.5rem;font-weight:800;margin:6px 0;color:var(--text)}
+.staking-card .s-ai{font-size:.75rem;color:var(--accent-violet);display:flex;align-items:center;justify-content:center;gap:5px;margin-top:6px}
+.staking-card .s-ai .ai-dot{width:5px;height:5px}
+
+/* Activity Feed */
+.activity-feed{max-height:440px;overflow-y:auto}
+.activity-feed::-webkit-scrollbar{width:4px}
+.activity-feed::-webkit-scrollbar-track{background:transparent}
+.activity-feed::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.feed-entry{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;line-height:1.4}
+.feed-entry:last-child{border-bottom:none}
+.feed-time{color:var(--text-muted);font-variant-numeric:tabular-nums;white-space:nowrap;font-size:11px;min-width:56px;flex-shrink:0}
+.feed-tag{display:inline-block;font-size:10px;font-weight:600;padding:1px 7px;border-radius:3px;margin-right:6px;text-transform:uppercase;letter-spacing:.3px;vertical-align:middle}
+.tag-block{background:rgba(79,140,247,.12);color:var(--accent-blue)}
+.tag-stake{background:rgba(52,211,153,.12);color:var(--accent-teal)}
+.tag-reward{background:rgba(251,191,36,.12);color:var(--accent-gold)}
+.tag-node{background:rgba(100,116,139,.15);color:var(--text-dim)}
+.tag-exec{background:rgba(79,140,247,.12);color:var(--accent-blue)}
+.tag-ai{background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(34,211,238,.1));color:var(--accent-violet)}
+.feed-text{color:var(--text-dim)}
+
+/* Report */
+.report-section{margin-bottom:24px}
+.report-trigger{display:flex;align-items:center;gap:10px;padding:14px 24px;background:linear-gradient(135deg,rgba(167,139,250,.1),rgba(34,211,238,.06));border:1px solid rgba(167,139,250,.25);border-radius:var(--radius);cursor:pointer;font-family:var(--font);font-size:.92rem;font-weight:600;color:var(--accent-violet);transition:all .2s;width:100%;backdrop-filter:blur(12px)}
+.report-trigger:hover{background:linear-gradient(135deg,rgba(167,139,250,.18),rgba(34,211,238,.1));border-color:var(--accent-violet)}
+.report-output{margin-top:14px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;display:none;font-size:.86rem;line-height:1.8}
+.report-output.visible{display:block;animation:fade-in .3s ease}
+.report-output h3{font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--accent-violet);display:flex;align-items:center;gap:8px}
+.report-output .report-section-title{font-weight:700;color:var(--text);margin-top:16px;margin-bottom:6px;font-size:.88rem;border-bottom:1px solid var(--border);padding-bottom:4px}
+.report-output .report-metric{display:flex;justify-content:space-between;padding:4px 0;color:var(--text-dim)}
+.report-output .report-metric .val{color:var(--text);font-weight:600}
+.report-output .report-note{margin-top:20px;padding:12px;background:rgba(79,140,247,.05);border-radius:var(--radius-sm);border:1px solid rgba(79,140,247,.15);color:var(--text-dim);font-size:.78rem;display:flex;align-items:flex-start;gap:8px}
+.report-line{opacity:0;transform:translateY(4px);transition:opacity .3s,transform .3s}
+.report-line.visible{opacity:1;transform:translateY(0)}
+
+/* Full coverage note */
+.full-coverage-note{font-size:12px;color:var(--accent-blue);font-weight:600;display:flex;align-items:center;gap:6px;margin-top:12px;padding:8px 14px;background:rgba(79,140,247,.06);border-radius:var(--radius)}
+
+/* ── Staggered Card Reveal ─────────────────────────── */
+.dashboard .card,.dashboard .rec-card,.dashboard .staking-card,.dashboard .metric-card,.dashboard .chart-panel{opacity:0;animation:card-reveal .5s ease forwards}
+.dashboard .card:nth-child(1),.dashboard .rec-card:nth-child(1){animation-delay:.1s}
+.dashboard .card:nth-child(2),.dashboard .rec-card:nth-child(2){animation-delay:.2s}
+.dashboard .card:nth-child(3),.dashboard .rec-card:nth-child(3){animation-delay:.3s}
+.dashboard .staking-card:nth-child(1){animation-delay:.15s}
+.dashboard .staking-card:nth-child(2){animation-delay:.25s}
+.dashboard .staking-card:nth-child(3){animation-delay:.35s}
+.dashboard .staking-card:nth-child(4){animation-delay:.45s}
+.dashboard .staking-card:nth-child(5){animation-delay:.55s}
+.dashboard .metric-card:nth-child(1){animation-delay:.1s}
+.dashboard .metric-card:nth-child(2){animation-delay:.2s}
+.dashboard .metric-card:nth-child(3){animation-delay:.3s}
+.dashboard .metric-card:nth-child(4){animation-delay:.4s}
+.dashboard .chart-panel{animation-delay:.2s}
+
+/* Ambient AI title glow for section titles */
+.section-title-glow{background:linear-gradient(90deg,var(--accent-violet),var(--accent-cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+
+/* ── Responsive ────────────────────────────────────── */
+@media(max-width:768px){
+  .provider-grid{grid-template-columns:1fr}
+  .two-col{grid-template-columns:1fr}
+  .step-labels{display:none}
+  .node-detail-grid{grid-template-columns:repeat(2,1fr)}
+  .dash-header{flex-direction:column;gap:12px;align-items:flex-start}
+  .dash-stats{gap:16px}
+  .summary-grid{grid-template-columns:1fr}
+  .ai-preflight-grid{grid-template-columns:1fr}
+  .node-tabs{flex-wrap:wrap}
+  .staking-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="bg-grain"></div>
+
+<!-- ═══════════ HEADER ═══════════ -->
+<header class="header">
+  <div class="header-left">
+    <a href="#" class="logo">
+      <svg viewBox="0 0 194.66 260.16" xmlns="http://www.w3.org/2000/svg">
+        <path d="m194.65 64.57v131l-64.58 64.57-130.07-130.06 40.4-40.39 89.68-89.69zm-39.65 49.69s-46-7.26-31.5-69.1c-25.5 30.91-27.28 45.46-25.5 63.65s19.94 43.71 43.65 43.7h13.35z" fill="#4F8CF7"/>
+      </svg>
+      <span class="logo-text">Bison Trails<span style="color:var(--accent-blue)">.ai</span></span>
+    </a>
+    <nav class="header-nav">
+      <a href="#">Platform</a>
+      <a href="#">News</a>
+      <a href="#" class="active">Protocols</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <span class="ai-indicator"><span class="ai-dot"></span> AI Active</span>
+    <button class="reset-btn" id="resetBtn" title="Reset to wizard (R)">&#8635; New Validator <kbd>R</kbd></button>
+    <button class="btn-login">Log In</button>
+  </div>
+</header>
+
+<!-- ═══════════ WIZARD VIEW ═══════════ -->
+<div id="wizard-view">
+  <div class="wizard">
+    <div class="wizard-header">
+      <h1>Create Validator <span class="ai-indicator" style="font-size:.65rem;vertical-align:middle;margin-left:8px"><span class="ai-dot"></span> AI-Assisted</span></h1>
+      <p>Deploy AI-optimized blockchain infrastructure in minutes</p>
+    </div>
+
+    <div class="step-labels" id="stepLabels">
+      <span class="step-label active">Network</span>
+      <span class="step-label">Provider &amp; Region</span>
+      <span class="step-label">Nodes</span>
+      <span class="step-label">Review</span>
+    </div>
+
+    <div class="step-container" id="stepContainer">
+
+      <!-- STEP 1: Select Network -->
+      <div class="step active" id="step-1">
+        <div class="step-title">Select Network</div>
+        <div class="step-subtitle">Choose a blockchain protocol to deploy validators on.</div>
+        <select class="network-select" id="networkSelect">
+          <option value="flow">Flow — Live</option>
+          <option value="algorand">Algorand — Live</option>
+          <option value="celo">Celo — Live</option>
+          <option value="cosmos">Cosmos — Live</option>
+          <option value="tezos">Tezos — Live</option>
+          <option value="polkadot">Polkadot — Live</option>
+          <option value="eth2" disabled>ETH 2.0 — Testing</option>
+          <option value="solana" disabled>Solana — Testing</option>
+          <option value="near" disabled>NEAR — Testing</option>
+        </select>
+        <div class="ai-recommendation-inline" id="aiNetworkRec">
+          <span class="ai-dot-inline"></span>
+          <div><strong style="color:var(--accent-violet)">AI Insight:</strong> Flow is the recommended network — Bison Trails is one of only 3 Execution Node operators. Multi-role architecture enables optimized staking across 5 specialized node types with 99.9% uptime guarantee.</div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Provider & Region -->
+      <div class="step" id="step-2">
+        <div class="step-title">Select Cloud Provider</div>
+        <div class="step-subtitle">Choose your infrastructure provider. All providers support multi-region deployment.</div>
+        <div class="provider-grid">
+          <div class="provider-card selected" data-provider="aws">
+            <div class="provider-icon">&#9729;&#65039;</div>
+            <div class="provider-name">AWS</div>
+            <div class="provider-detail">7 regions available</div>
+            <div class="provider-badge">AI Recommended</div>
+          </div>
+          <div class="provider-card" data-provider="gcp">
+            <div class="provider-icon">&#9729;&#65039;</div>
+            <div class="provider-name">GCP</div>
+            <div class="provider-detail">5 regions available</div>
+          </div>
+          <div class="provider-card" data-provider="azure">
+            <div class="provider-icon">&#9729;&#65039;</div>
+            <div class="provider-name">Azure</div>
+            <div class="provider-detail">6 regions available</div>
+          </div>
+        </div>
+        <div class="step-title" id="regionTitle" style="margin-top:32px;display:none;">Select Region</div>
+        <div class="step-subtitle" id="regionSubtitle" style="display:none;"></div>
+        <div class="region-list" id="regionList"></div>
+      </div>
+
+      <!-- STEP 3: Configure Nodes -->
+      <div class="step" id="step-3">
+        <div class="step-title">Configure Validator Nodes</div>
+        <div class="step-subtitle">Flow separates work across specialized node roles. Bison Trails supports all five.</div>
+        <div class="pipeline" id="pipeline">
+          <span class="pipeline-node enabled" data-pipe="collection">Collection</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="consensus">Consensus</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="execution">Execution</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="verification">Verification</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="access">Access</span>
+        </div>
+        <div class="node-config-grid" id="nodeConfigGrid"></div>
+        <div class="ai-node-suggestion" id="aiNodeSuggestion">
+          <span class="ai-dot-inline"></span>
+          <div><strong style="color:var(--accent-teal)">AI Load Analysis:</strong> Based on current Flow network traffic patterns, we recommend: Collection &times;3, Consensus &times;2, Verification &times;4, Access &times;2. Execution nodes are managed by Bison Trails internally.</div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review & Deploy -->
+      <div class="step" id="step-4">
+        <div class="step-title">Review &amp; Deploy</div>
+        <div class="step-subtitle">Confirm your configuration before deploying.</div>
+        <div class="review-grid" id="reviewGrid"></div>
+        <div class="ai-preflight" id="aiPreflight">
+          <h4><span class="ai-dot" style="margin-right:2px"></span> AI Pre-Flight Check</h4>
+          <div class="ai-preflight-grid">
+            <div class="ai-preflight-item">
+              <div class="pf-label">Predicted Uptime</div>
+              <div class="pf-value" style="color:var(--accent-teal)" id="pfUptime">99.97%</div>
+            </div>
+            <div class="ai-preflight-item">
+              <div class="pf-label">Estimated Yield</div>
+              <div class="pf-value" style="color:var(--accent-gold)" id="pfYield">8.2%</div>
+            </div>
+            <div class="ai-preflight-item">
+              <div class="pf-label">Risk Assessment</div>
+              <div class="pf-value" style="color:var(--accent-teal)" id="pfRisk">Low</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:24px;">
+          <button class="btn btn-deploy" id="deployBtn">Deploy AI-Optimized Validators</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="wizard-nav" id="wizardNav">
+      <button class="btn btn-secondary" id="prevBtn" disabled>&larr; Back</button>
+      <button class="btn btn-primary" id="nextBtn">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DEPLOY OVERLAY ═══════════ -->
+<div class="deploy-overlay" id="deployOverlay">
+  <h2>Deploying AI-Optimized Validators</h2>
+  <div class="deploy-steps" id="deploySteps"></div>
+</div>
+
+<!-- ═══════════ DASHBOARD VIEW ═══════════ -->
+<div id="dashboard-view">
+  <div class="dashboard">
+
+    <!-- Dashboard Header -->
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <h1>Your Flow Nodes</h1>
+        <div class="network-badge"><span class="dot"></span> Connected to Flow Mainnet</div>
+        <span class="ai-indicator"><span class="ai-dot"></span> AI Monitoring Active</span>
+      </div>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-value" id="dashStaked">1,250,000 FLOW</div>
+          <div class="dash-stat-label">Total Staked</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-value" style="color:var(--accent-teal)">99.97%</div>
+          <div class="dash-stat-label">Cluster Health</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-value">847</div>
+          <div class="dash-stat-label">Current Epoch</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NLP Query Bar -->
+    <section class="query-section">
+      <div class="query-bar">
+        <span class="search-icon">&#128269;</span>
+        <input type="text" id="queryInput" placeholder="Ask anything about your network..." autocomplete="off"/>
+        <button class="submit-btn" onclick="handleQuery()" title="Submit">&#10148;</button>
+      </div>
+      <div class="query-chips">
+        <button onclick="setQuery('Show node auto-scaling suggestions')">Node auto-scaling suggestions</button>
+        <button onclick="setQuery('Predict network health for next 7 days')">Predict network health</button>
+        <button onclick="setQuery('What\'s our biggest risk right now?')">Biggest risk right now?</button>
+        <button onclick="setQuery('Generate a weekly report')">Generate weekly report</button>
+      </div>
+      <div class="query-result" id="queryResult">
+        <div class="query-result-header">
+          <span class="ai-indicator"><span class="ai-dot"></span> AI-Generated Response</span>
+          <button class="query-close" onclick="closeQuery()">&#10005;</button>
+        </div>
+        <div class="query-result-body" id="queryResultBody"></div>
+      </div>
+    </section>
+
+    <!-- Anomaly Banner -->
+    <div class="anomaly-banner" id="anomalyBanner" onclick="toggleAnomaly()">
+      <div class="anomaly-header">
+        <div class="left">
+          <span class="icon">&#9889;</span>
+          <span class="label">Anomaly Detected: Coinbase Custody transaction volume 2.3&sigma; above baseline</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="badge">3 min ago</span>
+          <span class="chevron">&#9660;</span>
+        </div>
+      </div>
+      <div class="anomaly-details">
+        <div class="detail-grid">
+          <div class="detail-item"><div class="label">Detection Method</div><div class="value">Rolling z-score on 24h tx volume (window: 7d, threshold: 2.0&sigma;)</div></div>
+          <div class="detail-item"><div class="label">Current Value</div><div class="value">14,280 tx/hr <span style="color:var(--accent-gold)">(+131% vs. baseline)</span></div></div>
+          <div class="detail-item"><div class="label">Probable Cause</div><div class="value">NBA Top Shot drop scheduled 2h ago; correlates with prior spike patterns</div></div>
+          <div class="detail-item"><div class="label">Recommended Action</div><div class="value" style="color:var(--accent-teal)">No action required &mdash; event-driven, expected to normalize within 4-6h</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Node Status Table -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Node Status</span>
+        <span class="card-badge badge-teal" id="nodeCountBadge">0 Active</span>
+      </div>
+      <table class="node-table" id="nodeTable">
+        <thead><tr><th>Node Type</th><th>Nodes</th><th>Status</th><th>Uptime</th><th>Last Epoch</th><th>AI Prediction</th><th>Role</th></tr></thead>
+        <tbody id="nodeTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Node Type Tabs -->
+    <section style="margin-bottom:24px">
+      <div class="section-title">Node Intelligence <span class="ai-indicator"><span class="ai-dot"></span> Real-time AI</span></div>
+      <div class="node-tabs" id="nodeTabs">
+        <button class="node-tab active" data-tab="consensus" onclick="switchTab('consensus',this)">Consensus <span class="health-dot" style="background:var(--accent-teal)"></span><span style="font-size:.7rem;color:var(--accent-teal)">&#9650;</span></button>
+        <button class="node-tab" data-tab="collection" onclick="switchTab('collection',this)">Collection <span class="health-dot" style="background:var(--accent-gold)"></span><span style="font-size:.7rem;color:var(--accent-gold)">&#9654;</span></button>
+        <button class="node-tab" data-tab="execution" onclick="switchTab('execution',this)">Execution <span class="health-dot" style="background:var(--accent-teal)"></span><span style="font-size:.7rem;color:var(--accent-teal)">&#9650;</span></button>
+        <button class="node-tab" data-tab="verification" onclick="switchTab('verification',this)">Verification <span class="health-dot" style="background:var(--accent-teal)"></span><span style="font-size:.7rem;color:var(--accent-teal)">&#9650;</span></button>
+        <button class="node-tab" data-tab="access" onclick="switchTab('access',this)">Access <span class="health-dot" style="background:var(--accent-teal)"></span><span style="font-size:.7rem;color:var(--accent-teal)">&#9650;</span></button>
+      </div>
+      <div class="node-content active" id="tab-consensus"><div class="node-metrics">
+        <div class="metric-card"><div class="metric-label">Active Nodes</div><div class="metric-value">42</div><div class="metric-sub"><span style="color:var(--accent-teal)">&#9650; 2</span> since last epoch</div><div class="ai-prediction"><span class="ai-dot"></span> Predicted next epoch: 44 nodes (82% conf.)</div></div>
+        <div class="metric-card"><div class="metric-label">Block Finality</div><div class="metric-value">2.8s</div><div class="metric-sub">Target: &lt;3s</div><div class="ai-prediction"><span class="ai-dot"></span> 7-day forecast: 2.6s avg (improving)</div></div>
+        <div class="metric-card"><div class="metric-label">Epoch Uptime</div><div class="metric-value" style="color:var(--accent-teal)">99.99%</div><div class="metric-sub">Current epoch: 147</div><div class="ai-prediction"><span class="ai-dot"></span> Anomaly probability (24h): 0.8%</div></div>
+        <div class="metric-card"><div class="metric-label">AI Health Score</div><div class="metric-value" style="color:var(--accent-teal)">96</div><div class="metric-sub">&#9650; Trending up from 93</div><div class="ai-prediction"><span class="ai-dot"></span> Based on 14 latent signals</div></div>
+      </div></div>
+      <div class="node-content" id="tab-collection"><div class="node-metrics">
+        <div class="metric-card"><div class="metric-label">Active Nodes</div><div class="metric-value">18</div><div class="metric-sub"><span style="color:var(--accent-gold)">&#9654; 0</span> since last epoch</div><div class="ai-prediction"><span class="ai-dot"></span> Capacity utilization: 87% — approaching threshold</div></div>
+        <div class="metric-card"><div class="metric-label">Tx Throughput</div><div class="metric-value">1,247/s</div><div class="metric-sub">Peak today: 2,891/s</div><div class="ai-prediction"><span class="ai-dot"></span> Predicted peak (24h): 3,400/s during Top Shot event</div></div>
+        <div class="metric-card"><div class="metric-label">Pending Collections</div><div class="metric-value">342</div><div class="metric-sub">Avg processing: 1.2s</div><div class="ai-prediction"><span class="ai-dot"></span> Queue will clear in ~4.6 min at current rate</div></div>
+        <div class="metric-card"><div class="metric-label">AI Health Score</div><div class="metric-value" style="color:var(--accent-gold)">78</div><div class="metric-sub" style="color:var(--accent-gold)">&#9654; Flat — capacity concern</div><div class="ai-prediction"><span class="ai-dot"></span> Recommend scaling review within 2 weeks</div></div>
+      </div></div>
+      <div class="node-content" id="tab-execution"><div class="node-metrics">
+        <div class="metric-card"><div class="metric-label">Active Nodes</div><div class="metric-value">8</div><div class="metric-sub"><span style="color:var(--accent-teal)">&#9650; 1</span> since last epoch</div><div class="ai-prediction"><span class="ai-dot"></span> Sufficient for 2.5x current load</div></div>
+        <div class="metric-card"><div class="metric-label">Compute Utilization</div><div class="metric-value">62%</div><div class="metric-sub">Healthy headroom</div><div class="ai-prediction"><span class="ai-dot"></span> Predicted peak: 74% (within safe bounds)</div></div>
+        <div class="metric-card"><div class="metric-label">Smart Contract Calls</div><div class="metric-value">8.4M</div><div class="metric-sub">Last 24h</div><div class="ai-prediction"><span class="ai-dot"></span> Trending +12% week-over-week</div></div>
+        <div class="metric-card"><div class="metric-label">AI Health Score</div><div class="metric-value" style="color:var(--accent-teal)">92</div><div class="metric-sub">&#9650; Trending up</div><div class="ai-prediction"><span class="ai-dot"></span> No risks identified</div></div>
+      </div></div>
+      <div class="node-content" id="tab-verification"><div class="node-metrics">
+        <div class="metric-card"><div class="metric-label">Active Nodes</div><div class="metric-value">124</div><div class="metric-sub"><span style="color:var(--accent-teal)">&#9650; 6</span> since last epoch</div><div class="ai-prediction"><span class="ai-dot"></span> Strong decentralization trajectory</div></div>
+        <div class="metric-card"><div class="metric-label">Chunks Verified</div><div class="metric-value">1.2M</div><div class="metric-sub">Last 24h — 100% verified</div><div class="ai-prediction"><span class="ai-dot"></span> Zero verification failures in 30 days</div></div>
+        <div class="metric-card"><div class="metric-label">Avg Verification Time</div><div class="metric-value">0.4s</div><div class="metric-sub">Well below 1s target</div><div class="ai-prediction"><span class="ai-dot"></span> Stable — no degradation predicted</div></div>
+        <div class="metric-card"><div class="metric-label">AI Health Score</div><div class="metric-value" style="color:var(--accent-teal)">98</div><div class="metric-sub">&#9650; Highest across all node types</div><div class="ai-prediction"><span class="ai-dot"></span> Exemplary performance</div></div>
+      </div></div>
+      <div class="node-content" id="tab-access"><div class="node-metrics">
+        <div class="metric-card"><div class="metric-label">Active Nodes</div><div class="metric-value">89</div><div class="metric-sub"><span style="color:var(--accent-teal)">&#9650; 4</span> since last epoch</div><div class="ai-prediction"><span class="ai-dot"></span> Growing — community-operated nodes increasing</div></div>
+        <div class="metric-card"><div class="metric-label">API Requests</div><div class="metric-value">34.2M</div><div class="metric-sub">Last 24h</div><div class="ai-prediction"><span class="ai-dot"></span> Predicted peak: 41M during next NBA drop</div></div>
+        <div class="metric-card"><div class="metric-label">P99 Latency</div><div class="metric-value">142ms</div><div class="metric-sub">Target: &lt;200ms</div><div class="ai-prediction"><span class="ai-dot"></span> Trending stable — well within SLA</div></div>
+        <div class="metric-card"><div class="metric-label">AI Health Score</div><div class="metric-value" style="color:var(--accent-teal)">91</div><div class="metric-sub">&#9650; Trending up from 88</div><div class="ai-prediction"><span class="ai-dot"></span> API reliability excellent</div></div>
+      </div></div>
+    </section>
+
+    <!-- Two Column: Staking + Summary -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><span class="card-title">Staking Distribution</span><span class="card-badge badge-blue">4 Node Types</span></div>
+        <div class="staking-bars" id="stakingBars"></div>
+        <div class="staking-total"><span class="staking-total-label">Total FLOW Staked</span><span class="staking-total-value">1,250,000</span></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title">Network Summary</span><span class="ai-indicator" style="font-size:.6rem"><span class="ai-dot"></span> AI Enhanced</span></div>
+        <div class="summary-grid">
+          <div class="summary-item"><div class="summary-item-value">1,250,000</div><div class="summary-item-label">Total FLOW Staked</div></div>
+          <div class="summary-item"><div class="summary-item-value gold">12,450</div><div class="summary-item-label">Rewards (Current Epoch)</div></div>
+          <div class="summary-item"><div class="summary-item-value teal">8.2%</div><div class="summary-item-label">Annual Rewards Rate</div></div>
+          <div class="summary-item"><div class="summary-item-value teal">99.97%</div><div class="summary-item-label">Cluster Uptime</div></div>
+          <div class="summary-item"><div class="summary-item-value">Oct 13, 2020</div><div class="summary-item-label">Active Since</div></div>
+          <div class="summary-item"><div class="summary-item-value">Multi-region</div><div class="summary-item-label">Regions (non-US)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Chart (full-width) -->
+    <div class="chart-panel" style="margin-bottom:24px">
+      <div class="section-title">Network Health &mdash; Predicted vs Actual <span class="ai-indicator"><span class="ai-dot"></span> ML Model</span></div>
+      <div class="chart-controls">
+        <button class="chart-btn active" data-range="7" onclick="switchChartRange(7,this)">7 Day</button>
+        <button class="chart-btn" data-range="14" onclick="switchChartRange(14,this)">14 Day</button>
+        <button class="chart-btn" data-range="30" onclick="switchChartRange(30,this)">30 Day</button>
+      </div>
+      <div style="position:relative"><svg class="chart-svg" id="healthChart" viewBox="0 0 600 220" preserveAspectRatio="none"></svg><div class="chart-tooltip" id="chartTooltip"></div></div>
+      <div style="display:flex;gap:20px;margin-top:10px;font-size:.75rem;color:var(--text-dim)">
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:20px;height:2px;background:var(--accent-teal);display:inline-block"></span> Actual</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:20px;height:0;border-top:2px dashed var(--accent-blue);display:inline-block"></span> Predicted</span>
+        <span style="display:flex;align-items:center;gap:6px"><span style="width:20px;height:8px;background:rgba(79,140,247,.15);display:inline-block;border-radius:2px"></span> Confidence Band</span>
+      </div>
+    </div>
+
+    <!-- AI Recommendations -->
+    <div class="section-title">AI Recommendations <span class="ai-indicator"><span class="ai-dot"></span> Auto-generated</span></div>
+    <div class="grid-3" id="recCards">
+      <div class="rec-card" id="rec1"><div class="rec-card-header"><div><span class="rec-type rec-type-suggest">Suggested</span><h3>Enable Predictive Auto-Scaling</h3></div><div class="confidence">92% conf.</div></div><div class="rec-card-actions"><button onclick="toggleRecCard('rec1')">View Analysis</button></div><div class="rec-card-details"><div class="rec-card-details-inner"><p style="margin-bottom:10px">ML model detects Collection nodes at 87% capacity with 12% WoW growth. Auto-scaling would provision nodes 48h before threshold breach:</p><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Capacity Trend</span><div class="factor-bar"><div class="factor-bar-fill" style="width:87%;background:var(--accent-gold)"></div></div><span style="font-size:.78rem;color:var(--accent-gold)">87%</span></div><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Cost Efficiency</span><div class="factor-bar"><div class="factor-bar-fill" style="width:78%;background:var(--accent-teal)"></div></div><span style="font-size:.78rem;color:var(--accent-teal)">High</span></div><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Response Time</span><div class="factor-bar"><div class="factor-bar-fill" style="width:92%;background:var(--accent-teal)"></div></div><span style="font-size:.78rem;color:var(--accent-teal)">Automated, &lt;3h</span></div><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Risk Reduction</span><div class="factor-bar"><div class="factor-bar-fill" style="width:85%;background:var(--accent-teal)"></div></div><span style="font-size:.78rem;color:var(--accent-teal)">High</span></div><p style="margin-top:12px;color:var(--text)"><strong>Projected impact:</strong> Zero-downtime scaling, ~$8K/mo cost, eliminates manual capacity monitoring.</p></div></div></div>
+      <div class="rec-card" id="rec2"><div class="rec-card-header"><div><span class="rec-type rec-type-opportunity">Opportunity</span><h3>Flow Rewards Optimization via Dynamic Delegation</h3></div><div class="confidence">94% conf.</div></div><div class="rec-card-actions"><button onclick="toggleRecCard('rec2')">View Analysis</button></div><div class="rec-card-details"><div class="rec-card-details-inner"><p style="margin-bottom:10px">Analysis of 90-day staking patterns reveals suboptimal delegation. Rebalancing could yield:</p><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Yield Uplift</span><div class="factor-bar"><div class="factor-bar-fill" style="width:78%;background:var(--accent-teal)"></div></div><span style="font-size:.78rem;color:var(--accent-teal)">+0.3%</span></div><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Risk Reduction</span><div class="factor-bar"><div class="factor-bar-fill" style="width:65%;background:var(--accent-blue)"></div></div><span style="font-size:.78rem;color:var(--accent-blue)">Moderate</span></div><div class="factor"><span style="flex-shrink:0;width:120px;font-size:.78rem">Implementation</span><div class="factor-bar"><div class="factor-bar-fill" style="width:88%;background:var(--accent-teal)"></div></div><span style="font-size:.78rem;color:var(--accent-teal)">Automated</span></div><p style="margin-top:12px;color:var(--text)"><strong>Projected impact:</strong> 8.2% &rarr; 8.5% APY. Improves competitive positioning against Figment.</p></div></div></div>
+      <div class="rec-card" id="rec3"><div class="rec-card-header"><div><span class="rec-type rec-type-risk">Risk</span><h3>Collection Node Capacity at 87%</h3></div><div class="confidence">High conf.</div></div><div class="rec-card-actions"><button onclick="toggleRecCard('rec3')">View Mitigation</button></div><div class="rec-card-details"><div class="rec-card-details-inner"><p style="margin-bottom:10px">At current growth, collection nodes hit 95% capacity in 18 days. Options:</p><div style="margin:8px 0;padding:10px;background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.15);border-radius:8px"><strong style="color:var(--accent-teal)">Option A (Recommended):</strong> Provision 4 additional collection nodes. Lead time: 3 days. Cost: ~$12K/mo.</div><div style="margin:8px 0;padding:10px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.15);border-radius:8px"><strong style="color:var(--accent-gold)">Option B:</strong> Optimize transaction batching. No hardware cost. Extends runway ~10 days.</div><div style="margin:8px 0;padding:10px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.15);border-radius:8px"><strong style="color:var(--accent-red)">Option C (Do Nothing):</strong> Risk of degraded throughput during peak events. First impact: Mar 15 Top Shot drop.</div></div></div></div>
+    </div>
+
+    <!-- Epoch History -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Epoch History</span><span class="card-badge badge-gold">Last 10 Epochs</span></div>
+      <table class="epoch-table">
+        <thead><tr><th>Epoch</th><th>Uptime</th><th>Blocks</th><th>Rewards</th><th>Participation</th><th>AI Analysis</th></tr></thead>
+        <tbody id="epochTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Staking Metrics -->
+    <div class="section-title">Staking Overview <span class="ai-indicator"><span class="ai-dot"></span> AI Augmented</span></div>
+    <div class="staking-grid">
+      <div class="staking-card"><div class="s-label">Total Staked</div><div class="s-value">245.8M <span style="font-size:.7rem;color:var(--text-dim)">FLOW</span></div><div class="s-ai"><span class="ai-dot"></span> +2.1M last 7d</div></div>
+      <div class="staking-card"><div class="s-label">Annual Rewards Rate</div><div class="s-value" style="color:var(--accent-teal)">8.2%</div><div class="s-ai"><span class="ai-dot"></span> Predicted: 8.4% (&plusmn;0.3%)</div></div>
+      <div class="staking-card"><div class="s-label">Network Uptime</div><div class="s-value" style="color:var(--accent-teal)">99.99%</div><div class="s-ai"><span class="ai-dot"></span> 312 days without incident</div></div>
+      <div class="staking-card"><div class="s-label">Active Validators</div><div class="s-value">281</div><div class="s-ai"><span class="ai-dot"></span> +8 this epoch</div></div>
+      <div class="staking-card"><div class="s-label">Anomaly Probability</div><div class="s-value" style="color:var(--accent-teal)">2.1%</div><div class="s-ai"><span class="ai-dot"></span> Next 24h — low risk</div></div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Blockchain Activity</span><span class="card-badge badge-teal">Live Feed</span></div>
+      <div class="activity-feed" id="activityFeed"></div>
+    </div>
+
+    <!-- Report -->
+    <div class="section-title">Automated Reporting <span class="ai-indicator"><span class="ai-dot"></span> Zero-Touch</span></div>
+    <div class="report-section">
+      <button class="report-trigger" onclick="generateReport()"><span style="font-size:1.2rem">&#128202;</span> Generate Weekly Network Report <span style="margin-left:auto;font-size:.75rem;font-weight:400;color:var(--text-dim)">AI-powered &bull; ~2 seconds</span></button>
+      <div class="report-output" id="reportOutput"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ═══════════ STATE ═══════════ */
+  var state = {
+    currentStep: 1,
+    totalSteps: 4,
+    protocol: 'flow',
+    provider: 'aws',
+    region: 'us-east-1',
+    nodes: {
+      collection:   { enabled: true,  count: 0, role: 'Transaction pool management', resources: 'Bandwidth-heavy' },
+      consensus:    { enabled: true,  count: 0, role: 'Block finalization (HotStuff BFT)', resources: 'Moderate' },
+      execution:    { enabled: false, count: 0, role: 'Operated by Bison Trails internally', resources: 'CPU/Memory-heavy' },
+      verification: { enabled: true,  count: 0, role: 'Execution correctness verification', resources: 'Moderate' },
+      access:       { enabled: true,  count: 0, role: 'Public-facing API gateway', resources: 'Network-heavy' }
+    }
+  };
+
+  var regions = {
+    aws: [
+      { code: 'us-east-1', name: 'N. Virginia', latency: '~8ms' },
+      { code: 'us-west-2', name: 'Oregon', latency: '~10ms' },
+      { code: 'us-east-2', name: 'Ohio', latency: '~9ms' },
+      { code: 'eu-west-1', name: 'Ireland', latency: '~12ms' },
+      { code: 'eu-central-1', name: 'Frankfurt', latency: '~15ms' },
+      { code: 'ap-southeast-1', name: 'Singapore', latency: '~28ms' },
+      { code: 'ap-northeast-1', name: 'Tokyo', latency: '~32ms' }
+    ],
+    gcp: [
+      { code: 'us-central1', name: 'Iowa', latency: '~7ms' },
+      { code: 'us-east4', name: 'N. Virginia', latency: '~9ms' },
+      { code: 'europe-west1', name: 'Belgium', latency: '~14ms' },
+      { code: 'europe-west3', name: 'Frankfurt', latency: '~16ms' },
+      { code: 'asia-southeast1', name: 'Singapore', latency: '~30ms' }
+    ],
+    azure: [
+      { code: 'eastus', name: 'Virginia', latency: '~8ms' },
+      { code: 'westus2', name: 'Washington', latency: '~11ms' },
+      { code: 'centralus', name: 'Iowa', latency: '~9ms' },
+      { code: 'westeurope', name: 'Netherlands', latency: '~13ms' },
+      { code: 'northeurope', name: 'Ireland', latency: '~14ms' },
+      { code: 'southeastasia', name: 'Singapore', latency: '~29ms' }
+    ]
+  };
+
+  var aiRegionRec = { aws: 'eu-west-1', gcp: 'europe-west1', azure: 'westeurope' };
+
+  /* ═══════════ WIZARD LOGIC ═══════════ */
+  var stepLabelsEls = document.getElementById('stepLabels').children;
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var wizardNav = document.getElementById('wizardNav');
+  var deployBtn = document.getElementById('deployBtn');
+
+  function goToStep(n) {
+    if (n < 1 || n > state.totalSteps) return;
+    state.currentStep = n;
+    for (var j = 0; j < stepLabelsEls.length; j++) {
+      stepLabelsEls[j].className = 'step-label' + (j + 1 === n ? ' active' : '') + (j + 1 < n ? ' completed' : '');
+    }
+    document.querySelectorAll('.step').forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById('step-' + n).classList.add('active');
+    prevBtn.disabled = (n === 1);
+    if (n === state.totalSteps) { wizardNav.style.display = 'none'; }
+    else { wizardNav.style.display = 'flex'; nextBtn.textContent = 'Next \u2192'; }
+    if (n === 2) renderRegions();
+    if (n === 3) renderNodeConfig();
+    if (n === 4) renderReview();
+  }
+
+  prevBtn.addEventListener('click', function () { goToStep(state.currentStep - 1); });
+  nextBtn.addEventListener('click', function () { goToStep(state.currentStep + 1); });
+
+  /* Step 1: Protocol */
+  document.getElementById('networkSelect').addEventListener('change', function () {
+    state.protocol = this.value;
+    updateNetworkAiRecommendation();
+  });
+
+  function updateNetworkAiRecommendation() {
+    var rec = document.getElementById('aiNetworkRec');
+    var insights = {
+      flow: '<strong style="color:var(--accent-violet)">AI Insight:</strong> Flow is the recommended network \u2014 Bison Trails is one of only 3 Execution Node operators. Multi-role architecture enables optimized staking across 5 specialized node types with 99.9% uptime guarantee.',
+      algorand: '<strong style="color:var(--accent-violet)">AI Insight:</strong> Algorand offers pure proof-of-stake with fast finality. Current network APY: ~6.1%. Good choice for low-latency validation requirements.',
+      celo: '<strong style="color:var(--accent-violet)">AI Insight:</strong> Celo focuses on mobile-first DeFi. Staking rewards around 5.5% APY. Growing ecosystem with strong mobile wallet adoption.',
+      cosmos: '<strong style="color:var(--accent-violet)">AI Insight:</strong> Cosmos Hub offers IBC interoperability. Current staking yield: ~9.7% APY. High demand for validators in the interchain ecosystem.',
+      tezos: '<strong style="color:var(--accent-violet)">AI Insight:</strong> Tezos uses liquid proof-of-stake with on-chain governance. Baking rewards: ~5.5% APY. Mature ecosystem with institutional adoption.',
+      polkadot: '<strong style="color:var(--accent-violet)">AI Insight:</strong> Polkadot\'s nominated proof-of-stake offers ~14% APY. Parachain auctions drive validator demand. Complex but rewarding infrastructure.'
+    };
+    var html = insights[state.protocol] || insights.flow;
+    rec.innerHTML = '<span class="ai-dot-inline"></span><div>' + html + '</div>';
+  }
+
+  /* Step 2: Provider & Region */
+  document.querySelectorAll('.provider-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('.provider-card').forEach(function (c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      state.provider = card.dataset.provider;
+      state.region = regions[state.provider][0].code;
+      renderRegions();
+    });
+  });
+
+  function renderRegions() {
+    var list = document.getElementById('regionList');
+    var providerRegions = regions[state.provider];
+    var regionTitle = document.getElementById('regionTitle');
+    var subtitle = document.getElementById('regionSubtitle');
+    regionTitle.style.display = 'block';
+    subtitle.style.display = 'block';
+    subtitle.textContent = 'Choose a deployment region for ' + state.provider.toUpperCase() + '. AI-recommended region highlighted.';
+    list.innerHTML = '';
+    var recRegion = aiRegionRec[state.provider];
+    providerRegions.forEach(function (r) {
+      var el = document.createElement('div');
+      var isRec = r.code === recRegion;
+      el.className = 'region-item' + (r.code === state.region ? ' selected' : '');
+      el.innerHTML =
+        '<div class="region-left">' +
+          '<span class="region-code">' + r.code + '</span>' +
+          '<span class="region-name">' + r.name + '</span>' +
+          (isRec ? '<span class="ai-indicator" style="font-size:.6rem"><span class="ai-dot"></span> Recommended</span>' : '') +
+        '</div>' +
+        '<span class="region-latency">' + r.latency + '</span>';
+      el.addEventListener('click', function () {
+        list.querySelectorAll('.region-item').forEach(function (ri) { ri.classList.remove('selected'); });
+        el.classList.add('selected');
+        state.region = r.code;
+      });
+      list.appendChild(el);
+    });
+  }
+
+  /* Step 3: Node Config */
+  function renderNodeConfig() {
+    var grid = document.getElementById('nodeConfigGrid');
+    grid.innerHTML = '';
+    var nodeTypes = ['collection', 'consensus', 'execution', 'verification', 'access'];
+    var nodeLabels = { collection: 'Collection', consensus: 'Consensus', execution: 'Execution', verification: 'Verification', access: 'Access' };
+    nodeTypes.forEach(function (type) {
+      var n = state.nodes[type];
+      var card = document.createElement('div');
+      card.className = 'node-config-card' + (n.enabled ? ' enabled' : '');
+      card.innerHTML =
+        '<button class="node-toggle' + (n.enabled ? ' on' : '') + '" data-type="' + type + '"></button>' +
+        '<div class="node-config-info"><h4>' + nodeLabels[type] + '</h4><p>' + n.role + '</p><div class="node-resources">' + n.resources + '</div></div>' +
+        '<div class="node-config-controls">' +
+          '<button class="node-count-btn" data-action="dec" data-type="' + type + '">\u2212</button>' +
+          '<span class="node-count-value" id="count-' + type + '">' + n.count + '</span>' +
+          '<button class="node-count-btn" data-action="inc" data-type="' + type + '">+</button>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+    grid.querySelectorAll('.node-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.nodes[btn.dataset.type].enabled = !state.nodes[btn.dataset.type].enabled;
+        renderNodeConfig();
+        updatePipeline();
+      });
+    });
+    grid.querySelectorAll('.node-count-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var type = btn.dataset.type;
+        if (btn.dataset.action === 'inc') state.nodes[type].count++;
+        if (btn.dataset.action === 'dec' && state.nodes[type].count > 0) state.nodes[type].count--;
+        renderNodeConfig();
+      });
+    });
+    updatePipeline();
+  }
+
+  function updatePipeline() {
+    document.querySelectorAll('.pipeline-node').forEach(function (el) {
+      var type = el.dataset.pipe;
+      if (state.nodes[type] && state.nodes[type].enabled) el.classList.add('enabled');
+      else el.classList.remove('enabled');
+    });
+  }
+
+  /* Step 4: Review */
+  function renderReview() {
+    var grid = document.getElementById('reviewGrid');
+    var providerNames = { aws: 'Amazon Web Services (AWS)', gcp: 'Google Cloud Platform (GCP)', azure: 'Microsoft Azure' };
+    var regionName = '';
+    regions[state.provider].forEach(function (r) { if (r.code === state.region) regionName = r.name; });
+    var enabledNodes = [];
+    var totalNodes = 0;
+    Object.keys(state.nodes).forEach(function (type) {
+      var n = state.nodes[type];
+      if (n.enabled) { enabledNodes.push({ type: type, count: n.count }); totalNodes += n.count; }
+    });
+    var nodesHtml = enabledNodes.map(function (n) {
+      return '<div class="review-node-item"><span>' + n.type.charAt(0).toUpperCase() + n.type.slice(1) + ' \u00d7 ' + n.count + '</span></div>';
+    }).join('');
+    grid.innerHTML =
+      '<div class="review-section"><h4>Network</h4><div class="review-value">' + state.protocol.charAt(0).toUpperCase() + state.protocol.slice(1) + '</div><div class="review-detail">Mainnet \u00b7 All 5 node types supported</div></div>' +
+      '<div class="review-section"><h4>Infrastructure</h4><div class="review-value">' + providerNames[state.provider] + '</div><div class="review-detail">' + state.region + ' (' + regionName + ')</div></div>' +
+      '<div class="review-section"><h4>Node Configuration \u2014 ' + totalNodes + ' Nodes</h4><div class="review-nodes-list">' + nodesHtml + '</div></div>';
+    wizardNav.style.display = 'none';
+    // Update pre-flight predictions based on config
+    var uptimeEl = document.getElementById('pfUptime');
+    var yieldEl = document.getElementById('pfYield');
+    var riskEl = document.getElementById('pfRisk');
+    if (totalNodes >= 8) { uptimeEl.textContent = '99.99%'; yieldEl.textContent = '8.5%'; riskEl.textContent = 'Very Low'; riskEl.style.color = 'var(--accent-teal)'; }
+    else if (totalNodes >= 4) { uptimeEl.textContent = '99.97%'; yieldEl.textContent = '8.2%'; riskEl.textContent = 'Low'; riskEl.style.color = 'var(--accent-teal)'; }
+    else { uptimeEl.textContent = '99.90%'; yieldEl.textContent = '7.8%'; riskEl.textContent = 'Medium'; riskEl.style.color = 'var(--accent-gold)'; }
+  }
+
+  /* ═══════════ DEPLOY ANIMATION ═══════════ */
+  deployBtn.addEventListener('click', function () {
+    deployBtn.disabled = true;
+    deployBtn.textContent = 'Deploying...';
+    var steps = [{ text: 'AI pre-flight check...', ai: true }];
+    steps.push({ text: 'Initializing cloud resources...', ai: false });
+    Object.keys(state.nodes).forEach(function (type) {
+      if (state.nodes[type].enabled && state.nodes[type].count > 0) {
+        steps.push({ text: 'Deploying ' + type + ' nodes...', ai: false });
+      }
+    });
+    steps.push({ text: 'Configuring predictive monitoring...', ai: true });
+    steps.push({ text: 'Initializing anomaly detection...', ai: true });
+    steps.push({ text: 'AI-optimized validators online!', ai: true });
+
+    var deployStepsEl = document.getElementById('deploySteps');
+    deployStepsEl.innerHTML = '';
+    steps.forEach(function (s) {
+      var el = document.createElement('div');
+      el.className = 'deploy-step' + (s.ai ? ' ai-step' : '');
+      el.innerHTML = '<div class="deploy-check"></div><span>' + s.text + '</span>';
+      deployStepsEl.appendChild(el);
+    });
+
+    var overlay = document.getElementById('deployOverlay');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(function () { overlay.classList.add('show'); });
+
+    var stepEls = deployStepsEl.querySelectorAll('.deploy-step');
+    var delay = 400, interval = 500;
+    stepEls.forEach(function (el, i) {
+      setTimeout(function () {
+        el.classList.add('active');
+        el.querySelector('.deploy-check').innerHTML = '<span class="deploy-spinner"></span>';
+      }, delay + i * interval);
+      setTimeout(function () {
+        el.classList.remove('active');
+        el.classList.add('done');
+        el.querySelector('.deploy-check').innerHTML = el.classList.contains('ai-step') ? '&#10024;' : '&#10003;';
+      }, delay + i * interval + interval - 80);
+    });
+
+    var totalTime = delay + stepEls.length * interval + 600;
+    setTimeout(function () {
+      overlay.classList.remove('show');
+      setTimeout(function () {
+        overlay.style.display = 'none';
+        showDashboard();
+      }, 400);
+    }, totalTime);
+  });
+
+  /* ═══════════ DASHBOARD ═══════════ */
+  function showDashboard() {
+    document.body.classList.add('dashboard-active');
+    renderDashboard();
+    animateDashboard();
+    drawChart(7);
+  }
+
+  function renderDashboard() {
+    renderNodeTable();
+    renderStakingBars();
+    renderEpochHistory();
+    renderActivityFeed();
+    updateNodeCountBadge();
+  }
+
+  function updateNodeCountBadge() {
+    var total = 0;
+    Object.keys(state.nodes).forEach(function (type) {
+      if (state.nodes[type].enabled) total += state.nodes[type].count;
+    });
+    document.getElementById('nodeCountBadge').textContent = total + ' Active';
+  }
+
+  /* ── Node Status Table ─────────────────────────── */
+  var dashNodeData = {
+    collection:   { uptime: '99.98%', epoch: '1,247 tx/s', prediction: 'Capacity 87% \u2014 scale within 18d', detail: { region: 'us-east-1', cpu: '34%', memory: '2.1 GB', network: '890 Mbps', aiNote: 'Predicted peak: 3,400 tx/s during Top Shot events' } },
+    consensus:    { uptime: '99.99%', epoch: '0 missed blocks', prediction: 'Stable \u2014 finality improving to 2.6s', detail: { region: 'us-east-1', cpu: '28%', memory: '1.4 GB', network: '120 Mbps', aiNote: 'Anomaly probability next 24h: 0.8%' } },
+    execution:    { uptime: '99.97%', epoch: '8.4M contract calls', prediction: 'Sufficient for 2.5x current load', detail: { region: 'us-west-2', cpu: '72%', memory: '14.2 GB', network: '340 Mbps', aiNote: 'Compute trending +12% WoW \u2014 within safe bounds' } },
+    verification: { uptime: '99.99%', epoch: '1.2M chunks verified', prediction: 'Zero failures in 30d \u2014 exemplary', detail: { region: 'us-east-1', cpu: '41%', memory: '3.8 GB', network: '210 Mbps', aiNote: 'No degradation predicted' } },
+    access:       { uptime: '99.98%', epoch: '34.2M API requests', prediction: 'P99 142ms \u2014 well within SLA', detail: { region: 'us-east-1', cpu: '22%', memory: '1.2 GB', network: '1.4 Gbps', aiNote: 'Predicted peak: 41M requests during next drop' } }
+  };
+
+  function renderNodeTable() {
+    var tbody = document.getElementById('nodeTableBody');
+    tbody.innerHTML = '';
+    var nodeLabels = { collection: 'Collection', consensus: 'Consensus', execution: 'Execution', verification: 'Verification', access: 'Access' };
+    var nodeOrder = ['collection', 'consensus', 'execution', 'verification', 'access'];
+    nodeOrder.forEach(function (type) {
+      var n = state.nodes[type];
+      var d = dashNodeData[type];
+      if (!n.enabled) return;
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><span class="node-type-name"><span class="node-type-dot"></span>' + nodeLabels[type] + '</span></td>' +
+        '<td><strong>' + n.count + '</strong></td>' +
+        '<td style="color:var(--accent-teal);font-weight:600;">Active</td>' +
+        '<td><span class="uptime-value">' + d.uptime + '</span></td>' +
+        '<td>' + d.epoch + '</td>' +
+        '<td><span class="ai-inline-prediction"><span class="ai-dot"></span> ' + d.prediction + '</span></td>' +
+        '<td class="node-role-text">' + n.role + '</td>';
+      var expandTr = document.createElement('tr');
+      expandTr.className = 'node-expand-row';
+      expandTr.innerHTML =
+        '<td colspan="7"><div class="node-detail-grid">' +
+          '<div class="node-detail-item"><div class="ndi-label">Region</div><div class="ndi-value">' + d.detail.region + '</div></div>' +
+          '<div class="node-detail-item"><div class="ndi-label">Avg CPU</div><div class="ndi-value">' + d.detail.cpu + '</div></div>' +
+          '<div class="node-detail-item"><div class="ndi-label">Avg Memory</div><div class="ndi-value">' + d.detail.memory + '</div></div>' +
+          '<div class="node-detail-item"><div class="ndi-label">Network I/O</div><div class="ndi-value">' + d.detail.network + '</div></div>' +
+        '</div><div class="ai-recommendation-inline" style="margin-top:8px"><span class="ai-dot-inline"></span><div><strong style="color:var(--accent-violet)">AI:</strong> ' + d.detail.aiNote + '</div></div></td>';
+      tr.addEventListener('click', function () {
+        var isShown = expandTr.classList.contains('show');
+        tbody.querySelectorAll('.node-expand-row').forEach(function (r) { r.classList.remove('show'); });
+        if (!isShown) expandTr.classList.add('show');
+      });
+      tbody.appendChild(tr);
+      tbody.appendChild(expandTr);
+    });
+  }
+
+  /* ── Staking Distribution ──────────────────────── */
+  function renderStakingBars() {
+    var container = document.getElementById('stakingBars');
+    container.innerHTML = '';
+    var stakingTypes = ['collection', 'consensus', 'execution', 'verification'];
+    var colors = { collection: 'blue', consensus: 'teal', execution: 'navy', verification: 'gold' };
+    var labels = { collection: 'Collection', consensus: 'Consensus', execution: 'Execution', verification: 'Verification' };
+    var aiYields = { collection: 'Predicted yield: 8.1%', consensus: 'Predicted yield: 8.4%', execution: 'Predicted yield: 8.0%', verification: 'Predicted yield: 8.3%' };
+    var total = 1250000;
+    var perType = total / 4;
+    stakingTypes.forEach(function (type) {
+      if (!state.nodes[type].enabled) return;
+      var row = document.createElement('div');
+      row.className = 'staking-bar-row';
+      row.innerHTML =
+        '<span class="staking-bar-label">' + labels[type] + '</span>' +
+        '<div class="staking-bar-track"><div class="staking-bar-fill ' + colors[type] + '" data-width="25%"></div></div>' +
+        '<span class="staking-bar-value">' + Math.round(perType).toLocaleString() + ' FLOW</span>';
+      container.appendChild(row);
+      var aiRow = document.createElement('div');
+      aiRow.className = 'staking-bar-ai';
+      aiRow.innerHTML = '<span class="ai-dot"></span> ' + aiYields[type];
+      container.appendChild(aiRow);
+    });
+  }
+
+  /* ── Epoch History ─────────────────────────────── */
+  function renderEpochHistory() {
+    var tbody = document.getElementById('epochTableBody');
+    tbody.innerHTML = '';
+    var epochs = [
+      { epoch: 847, uptime: '99.99%', blocks: '12,847', rewards: '1,284.5', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 846, uptime: '99.98%', blocks: '12,691', rewards: '1,271.2', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 845, uptime: '99.99%', blocks: '12,923', rewards: '1,298.7', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 844, uptime: '99.97%', blocks: '12,584', rewards: '1,260.1', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 843, uptime: '99.99%', blocks: '12,776', rewards: '1,279.4', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 842, uptime: '99.96%', blocks: '12,451', rewards: '1,247.8', participation: '29/30', flagged: true, ai: '\u26a0 1 node missed \u2014 correlated with cloud provider maintenance window' },
+      { epoch: 841, uptime: '99.99%', blocks: '12,892', rewards: '1,291.6', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 840, uptime: '99.98%', blocks: '12,634', rewards: '1,265.2', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 839, uptime: '99.99%', blocks: '12,745', rewards: '1,276.3', participation: '30/30', flagged: false, ai: '' },
+      { epoch: 838, uptime: '99.97%', blocks: '12,518', rewards: '1,253.9', participation: '30/30', flagged: false, ai: '' }
+    ];
+    epochs.forEach(function (e) {
+      var tr = document.createElement('tr');
+      if (e.flagged) tr.className = 'ai-flagged';
+      tr.innerHTML =
+        '<td><strong>' + e.epoch + '</strong></td>' +
+        '<td class="uptime">' + e.uptime + '</td>' +
+        '<td>' + e.blocks + '</td>' +
+        '<td class="reward">' + e.rewards + ' FLOW</td>' +
+        '<td>' + e.participation + '</td>' +
+        '<td>' + (e.ai ? '<span class="ai-annotation"><span class="ai-dot"></span> ' + e.ai + '</span>' : '<span style="color:var(--text-muted)">\u2014</span>') + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Activity Feed ─────────────────────────────── */
+  function renderActivityFeed() {
+    var feed = document.getElementById('activityFeed');
+    feed.innerHTML = '';
+    var entries = [
+      { time: '10:42', tag: 'ai',     label: 'AI',        text: 'Anomaly detected: Coinbase Custody tx volume 2.3\u03c3 above baseline \u2014 attributed to Top Shot drop' },
+      { time: '10:42', tag: 'block',  label: 'Block',     text: 'Block #14,283,091 finalized \u2014 2.8s consensus time' },
+      { time: '10:41', tag: 'stake',  label: 'Stake',     text: 'Delegation received: 12,500 FLOW from 0x7a3f...c291' },
+      { time: '10:40', tag: 'exec',   label: 'Execution', text: 'Execution state committed \u2014 842 transactions processed' },
+      { time: '10:39', tag: 'ai',     label: 'AI',        text: 'Collection node capacity at 87% \u2014 scaling review recommended within 18 days' },
+      { time: '10:39', tag: 'block',  label: 'Block',     text: 'Block #14,283,090 finalized \u2014 2.5s consensus time' },
+      { time: '10:38', tag: 'reward', label: 'Reward',    text: 'Epoch 847 rewards: +1,284.5 FLOW distributed to 23 delegators' },
+      { time: '10:37', tag: 'node',   label: 'Node',      text: 'Consensus node #7 \u2014 heartbeat OK, 0 missed blocks' },
+      { time: '10:36', tag: 'stake',  label: 'Stake',     text: 'Delegation received: 8,200 FLOW from 0x2b91...e847' },
+      { time: '10:35', tag: 'exec',   label: 'Execution', text: 'Contract call batch: 1,247 CryptoKitties transfers processed' },
+      { time: '10:34', tag: 'ai',     label: 'AI',        text: 'Predictive model updated \u2014 7-day health forecast: 94.2/100 (91% confidence)' },
+      { time: '10:34', tag: 'block',  label: 'Block',     text: 'Block #14,283,089 finalized \u2014 2.6s consensus time' },
+      { time: '10:33', tag: 'node',   label: 'Node',      text: 'Collection cluster rebalanced \u2014 8 nodes, 0 dropped transactions' },
+      { time: '10:32', tag: 'reward', label: 'Reward',    text: 'Staking reward accrual: 142.3 FLOW pending for next epoch' },
+      { time: '10:31', tag: 'stake',  label: 'Stake',     text: 'New delegator: 0xf4c8...a012 staked 5,000 FLOW' }
+    ];
+    entries.forEach(function (e) {
+      var el = document.createElement('div');
+      el.className = 'feed-entry';
+      el.innerHTML = '<span class="feed-time">' + e.time + '</span><span class="feed-text"><span class="feed-tag tag-' + e.tag + '">' + e.label + '</span>' + e.text + '</span>';
+      feed.appendChild(el);
+    });
+  }
+
+  /* ── Dashboard Animation ───────────────────────── */
+  function animateDashboard() {
+    setTimeout(function () {
+      document.querySelectorAll('.staking-bar-fill').forEach(function (bar) {
+        bar.style.width = bar.dataset.width;
+      });
+    }, 200);
+  }
+
+  /* ═══════════ AI FEATURES (from AI version) ═══════════ */
+
+  /* Tab Switching */
+  window.switchTab = function (id, btn) {
+    document.querySelectorAll('.node-tab').forEach(function (t) { t.classList.remove('active'); });
+    document.querySelectorAll('.node-content').forEach(function (c) { c.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('tab-' + id).classList.add('active');
+  };
+
+  /* Anomaly Banner */
+  window.toggleAnomaly = function () {
+    document.getElementById('anomalyBanner').classList.toggle('expanded');
+  };
+
+  /* Rec Cards */
+  window.toggleRecCard = function (id) {
+    document.getElementById(id).classList.toggle('expanded');
+  };
+
+  /* NLP Query */
+  window.setQuery = function (q) {
+    document.getElementById('queryInput').value = q;
+    handleQuery();
+  };
+
+  window.closeQuery = function () {
+    document.getElementById('queryResult').classList.remove('visible');
+  };
+
+  window.handleQuery = function () {
+    var q = document.getElementById('queryInput').value.toLowerCase().trim();
+    if (!q) return;
+    var resultEl = document.getElementById('queryResult');
+    var bodyEl = document.getElementById('queryResultBody');
+    var html = '';
+    if (q.includes('scal') || q.includes('capacity') || q.includes('auto')) {
+      html = '<p style="margin-bottom:12px"><strong>Node Auto-Scaling Analysis</strong></p><table><tr><th>Node Type</th><th>Capacity</th><th>Trend</th><th>Headroom</th><th>Action</th></tr><tr><td>Collection</td><td><span style="color:var(--accent-gold);font-weight:600">87%</span></td><td>+12% WoW</td><td>~18 days</td><td><span class="status-pill status-progress">Scale recommended</span></td></tr><tr><td>Consensus</td><td><span style="color:var(--accent-teal);font-weight:600">42%</span></td><td>+2% WoW</td><td>>90 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr><tr><td>Execution</td><td><span style="color:var(--accent-teal);font-weight:600">62%</span></td><td>+5% WoW</td><td>>60 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr><tr><td>Verification</td><td><span style="color:var(--accent-teal);font-weight:600">38%</span></td><td>+1% WoW</td><td>>120 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr><tr><td>Access</td><td><span style="color:var(--accent-teal);font-weight:600">45%</span></td><td>+8% WoW</td><td>>45 days</td><td><span class="status-pill status-complete">Healthy</span></td></tr></table><p style="margin-top:10px;color:var(--text-dim);font-size:.82rem"><strong>Recommendation:</strong> Enable predictive auto-scaling for Collection nodes. ML model can provision 48h before threshold breach at ~$8K/mo.</p>';
+    } else if (q.includes('predict') && q.includes('health')) {
+      html = '<p style="margin-bottom:12px"><strong>7-Day Network Health Forecast</strong></p><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0"><div style="background:rgba(52,211,153,.06);padding:12px;border-radius:8px;border:1px solid rgba(52,211,153,.15)"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Overall Health</div><div style="font-size:1.3rem;font-weight:700;color:var(--accent-teal);margin:4px 0">94.2 / 100</div><div style="font-size:.78rem;color:var(--text-dim)">Confidence: 91%</div></div><div style="background:rgba(79,140,247,.06);padding:12px;border-radius:8px;border:1px solid rgba(79,140,247,.15)"><div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase">Predicted Uptime</div><div style="font-size:1.3rem;font-weight:700;color:var(--accent-blue);margin:4px 0">99.98%</div><div style="font-size:.78rem;color:var(--text-dim)">Confidence: 96%</div></div></div><p><strong>Key signals:</strong></p><ul style="margin:6px 0 0 16px;color:var(--text-dim)"><li>Consensus finality improving (2.8s \u2192 2.6s)</li><li>Collection node capacity primary concern \u2014 87%</li><li>No epoch boundary anomalies predicted</li><li>NBA Top Shot event on Day 4 may spike to 3,200+ tx/s</li></ul>';
+    } else if (q.includes('risk') || q.includes('biggest')) {
+      html = '<p style="margin-bottom:12px"><strong>Prioritized Risk Assessment</strong></p><div style="margin:10px 0;padding:14px;background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);border-radius:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:.72rem;font-weight:700;color:var(--accent-red);text-transform:uppercase">&#9632; Critical</span><span style="font-size:.88rem;font-weight:600">Collection Node Capacity Exhaustion</span></div><p style="color:var(--text-dim)">At 87% with 12% WoW growth, capacity in ~18 days. Top Shot event risk before remediation.</p><p style="color:var(--text);margin-top:6px"><strong>Mitigation:</strong> Enable predictive auto-scaling or provision 4 nodes manually (3-day lead, ~$12K/mo).</p></div><div style="margin:10px 0;padding:14px;background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:8px"><div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><span style="font-size:.72rem;font-weight:700;color:var(--accent-gold);text-transform:uppercase">&#9632; Medium</span><span style="font-size:.88rem;font-weight:600">Access Node API Latency During Peak Events</span></div><p style="color:var(--text-dim)">P99 latency at 142ms (SLA: 200ms). During Top Shot events, predicted spike to 185ms. Sufficient headroom but worth monitoring.</p></div>';
+    } else if (q.includes('report') || q.includes('weekly') || q.includes('generate')) {
+      generateReport(); return;
+    } else {
+      html = '<p>I can help with questions about your Flow network. Try asking about:</p><ul style="margin:10px 0 0 16px;color:var(--text-dim)"><li>Node auto-scaling suggestions</li><li>Network health predictions</li><li>Risk assessment</li><li>Generating reports</li><li>Node performance and capacity</li><li>Staking metrics and yield</li></ul>';
+    }
+    bodyEl.innerHTML = html;
+    resultEl.classList.add('visible');
+  };
+
+  document.getElementById('queryInput').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') handleQuery();
+  });
+
+  /* Health Chart */
+  function generateHealthData(days) {
+    var actual = [], predicted = [];
+    var val = 88 + Math.random() * 4;
+    for (var i = 0; i < days; i++) {
+      val += (Math.random() - 0.4) * 2;
+      val = Math.max(80, Math.min(100, val));
+      actual.push(val);
+    }
+    var pVal = actual[actual.length - 1];
+    for (var j = 0; j < 7; j++) {
+      pVal += (Math.random() - 0.35) * 1.5;
+      pVal = Math.max(82, Math.min(100, pVal));
+      predicted.push(pVal);
+    }
+    return { actual: actual, predicted: predicted };
+  }
+
+  function drawChart(days) {
+    var svg = document.getElementById('healthChart');
+    if (!svg) return;
+    var data = generateHealthData(days);
+    var totalDays = days + 7;
+    var w = 600, h = 200, pad = 30;
+    var chartW = w - pad * 2, chartH = h - pad * 2;
+    var minVal = 78, maxVal = 100;
+    function x(i) { return pad + (i / (totalDays - 1)) * chartW; }
+    function y(v) { return pad + chartH - ((v - minVal) / (maxVal - minVal)) * chartH; }
+    var s = '';
+    for (var v = 80; v <= 100; v += 5) {
+      s += '<line x1="' + pad + '" y1="' + y(v) + '" x2="' + (w - pad) + '" y2="' + y(v) + '" stroke="rgba(30,48,85,.4)" stroke-width=".5"/>';
+      s += '<text x="' + (pad - 6) + '" y="' + (y(v) + 3) + '" fill="var(--text-muted)" font-size="8" text-anchor="end">' + v + '</text>';
+    }
+    for (var i = 0; i < totalDays; i += Math.max(1, Math.floor(totalDays / 8))) {
+      var label = i < days ? 'D-' + (days - i) : 'D+' + (i - days + 1);
+      s += '<text x="' + x(i) + '" y="' + (h - 5) + '" fill="var(--text-muted)" font-size="7" text-anchor="middle">' + label + '</text>';
+    }
+    s += '<line x1="' + x(days - 1) + '" y1="' + pad + '" x2="' + x(days - 1) + '" y2="' + (h - pad) + '" stroke="var(--text-muted)" stroke-width=".5" stroke-dasharray="4,3"/>';
+    s += '<text x="' + x(days - 1) + '" y="' + (pad - 6) + '" fill="var(--text-muted)" font-size="7" text-anchor="middle">Today</text>';
+    var bandPath = 'M' + x(days - 1) + ',' + y(data.predicted[0] + 2);
+    for (var bi = 0; bi < data.predicted.length; bi++) bandPath += ' L' + x(days + bi) + ',' + y(data.predicted[bi] + 2 + bi * 0.15);
+    for (var bj = data.predicted.length - 1; bj >= 0; bj--) bandPath += ' L' + x(days + bj) + ',' + y(data.predicted[bj] - 2 - bj * 0.15);
+    bandPath += ' Z';
+    s += '<path d="' + bandPath + '" fill="rgba(79,140,247,.1)"/>';
+    s += '<polyline points="' + data.actual.map(function (v, i) { return x(i) + ',' + y(v); }).join(' ') + '" fill="none" stroke="var(--accent-teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+    s += '<polyline points="' + x(days - 1) + ',' + y(data.actual[data.actual.length - 1]) + ' ' + data.predicted.map(function (v, i) { return x(days + i) + ',' + y(v); }).join(' ') + '" fill="none" stroke="var(--accent-blue)" stroke-width="2" stroke-dasharray="6,4" stroke-linecap="round" stroke-linejoin="round"/>';
+    data.actual.forEach(function (v, i) {
+      s += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="12" fill="transparent" class="chart-hover" data-day="D-' + (days - i) + '" data-val="' + v.toFixed(1) + '" data-type="Actual"/>';
+      s += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="3" fill="var(--accent-teal)" pointer-events="none"/>';
+    });
+    data.predicted.forEach(function (v, i) {
+      s += '<circle cx="' + x(days + i) + '" cy="' + y(v) + '" r="12" fill="transparent" class="chart-hover" data-day="D+' + (i + 1) + '" data-val="' + v.toFixed(1) + '" data-type="Predicted"/>';
+      s += '<circle cx="' + x(days + i) + '" cy="' + y(v) + '" r="3" fill="var(--accent-blue)" pointer-events="none"/>';
+    });
+    svg.innerHTML = s;
+    var tooltip = document.getElementById('chartTooltip');
+    svg.querySelectorAll('.chart-hover').forEach(function (circle) {
+      circle.addEventListener('mouseenter', function () {
+        var rect = svg.getBoundingClientRect();
+        var cx = parseFloat(this.getAttribute('cx'));
+        var cy = parseFloat(this.getAttribute('cy'));
+        var type = this.dataset.type;
+        tooltip.innerHTML = '<strong>' + this.dataset.day + '</strong><br>' + type + ': <span style="color:' + (type === 'Actual' ? 'var(--accent-teal)' : 'var(--accent-blue)') + '">' + this.dataset.val + '</span>';
+        var scale = rect.width / 600;
+        tooltip.style.left = (cx * scale + 10) + 'px';
+        tooltip.style.top = (cy * scale - 10) + 'px';
+        tooltip.style.opacity = '1';
+      });
+      circle.addEventListener('mouseleave', function () { tooltip.style.opacity = '0'; });
+    });
+  }
+
+  window.switchChartRange = function (days, btn) {
+    document.querySelectorAll('.chart-btn').forEach(function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    drawChart(days);
+  };
+
+  /* Report Generator */
+  window.generateReport = function () {
+    var el = document.getElementById('reportOutput');
+    closeQuery();
+    var lines = [
+      { type: 'h3', text: 'Flow Network Status Report \u2014 Auto-generated' },
+      { type: 'date', text: 'Generated: ' + new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) + ' at ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) },
+      { type: 'section', text: 'Key Performance Metrics' },
+      { type: 'metric', label: 'Network Uptime', value: '99.99%' },
+      { type: 'metric', label: 'Total Staked', value: '245.8M FLOW (+2.1M WoW)' },
+      { type: 'metric', label: 'Annual Rewards Rate', value: '8.2% (predicted: 8.4%)' },
+      { type: 'metric', label: 'Active Validators', value: '281 (+8 this epoch)' },
+      { type: 'section', text: 'Node Capacity Forecast' },
+      { type: 'metric', label: 'Collection', value: '87% \u2014 scale within 18d' },
+      { type: 'metric', label: 'Consensus', value: '42% \u2014 healthy (>90d headroom)' },
+      { type: 'metric', label: 'Execution', value: '62% \u2014 healthy (>60d headroom)' },
+      { type: 'metric', label: 'Verification', value: '38% \u2014 healthy (>120d headroom)' },
+      { type: 'metric', label: 'Access', value: '45% \u2014 healthy (>45d headroom)' },
+      { type: 'section', text: 'AI-Flagged Anomalies' },
+      { type: 'para', text: '\u26a1 <strong>Coinbase Custody volume spike</strong> \u2014 2.3\u03c3 above baseline. Attributed to NBA Top Shot. Normalizing in 4-6h.' },
+      { type: 'para', text: '\u26a0\ufe0f <strong>Collection node capacity at 87%</strong> \u2014 trending to threshold in 18 days. Predictive auto-scaling recommended.' },
+      { type: 'section', text: 'AI Recommendations' },
+      { type: 'para', text: '<strong>1.</strong> Enable predictive auto-scaling for Collection nodes \u2014 zero-downtime, ~$8K/mo.' },
+      { type: 'para', text: '<strong>2.</strong> Optimize rewards via dynamic delegation \u2014 8.2% \u2192 8.5% APY.' },
+      { type: 'para', text: '<strong>3.</strong> Monitor Access node latency ahead of Mar 15 Top Shot event.' },
+      { type: 'note', text: '\u26a1 Auto-generated from network telemetry \u2014 previously required 4+ hours of manual compilation' }
+    ];
+    el.innerHTML = '';
+    el.classList.add('visible');
+    var delay = 0;
+    lines.forEach(function (line) {
+      var div = document.createElement('div');
+      div.className = 'report-line';
+      if (line.type === 'h3') div.innerHTML = '<h3>' + line.text + '</h3>';
+      else if (line.type === 'date') div.innerHTML = '<div style="color:var(--text-muted);font-size:.78rem;margin-bottom:8px">' + line.text + '</div>';
+      else if (line.type === 'section') div.innerHTML = '<div class="report-section-title">' + line.text + '</div>';
+      else if (line.type === 'metric') div.innerHTML = '<div class="report-metric"><span>' + line.label + '</span><span class="val">' + line.value + '</span></div>';
+      else if (line.type === 'para') div.innerHTML = '<p style="margin:4px 0;color:var(--text-dim)">' + line.text + '</p>';
+      else if (line.type === 'note') div.innerHTML = '<div class="report-note"><span style="flex-shrink:0">\u26a1</span> ' + line.text.replace('\u26a1 ', '') + '</div>';
+      el.appendChild(div);
+      delay += 60;
+      setTimeout(function (d) { d.classList.add('visible'); }.bind(null, div), delay);
+    });
+  };
+
+  /* ═══════════ RESET ═══════════ */
+  function resetToWizard() {
+    document.body.classList.remove('dashboard-active');
+    state.currentStep = 1;
+    state.protocol = 'flow';
+    state.provider = 'aws';
+    state.region = 'us-east-1';
+    state.nodes = {
+      collection:   { enabled: true,  count: 0, role: 'Transaction pool management', resources: 'Bandwidth-heavy' },
+      consensus:    { enabled: true,  count: 0, role: 'Block finalization (HotStuff BFT)', resources: 'Moderate' },
+      execution:    { enabled: false, count: 0, role: 'Operated by Bison Trails internally', resources: 'CPU/Memory-heavy' },
+      verification: { enabled: true,  count: 0, role: 'Execution correctness verification', resources: 'Moderate' },
+      access:       { enabled: true,  count: 0, role: 'Public-facing API gateway', resources: 'Network-heavy' }
+    };
+    document.getElementById('networkSelect').value = 'flow';
+    document.querySelectorAll('.provider-card').forEach(function (c) { c.classList.remove('selected'); });
+    document.querySelector('.provider-card[data-provider="aws"]').classList.add('selected');
+    document.getElementById('regionTitle').style.display = 'none';
+    document.getElementById('regionSubtitle').style.display = 'none';
+    document.getElementById('regionList').innerHTML = '';
+    deployBtn.disabled = false;
+    deployBtn.innerHTML = 'Deploy AI-Optimized Validators';
+    updateNetworkAiRecommendation();
+    goToStep(1);
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', resetToWizard);
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'r' || e.key === 'R') {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (document.body.classList.contains('dashboard-active')) resetToWizard();
+    }
+  });
+
+  /* ═══════════ INIT ═══════════ */
+  goToStep(1);
+
+})();
+</script>
+</body>
+</html>
