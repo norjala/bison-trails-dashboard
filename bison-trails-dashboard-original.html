@@ -1,0 +1,2398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bison Trails — Flow Validator Dashboard</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F8F9FB;
+    --bg-white: #FFFFFF;
+    --card: #FFFFFF;
+    --card-hover: #F0F2F7;
+    --accent-blue: #3535F0;
+    --accent-teal: #2ECDB0;
+    --accent-gold: #F5D547;
+    --accent-red: #EF4444;
+    --text: #1A1A2E;
+    --text-dim: #6B7280;
+    --text-muted: #9CA3AF;
+    --border: #E5E7EB;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --shadow-lg: 0 4px 12px rgba(0,0,0,0.1);
+    --radius: 8px;
+    --radius-lg: 12px;
+    --transition: 0.2s ease;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* ── Header ─────────────────────────────────────────────── */
+  .header {
+    background: var(--bg-white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  .logo svg { width: 28px; height: 28px; flex-shrink: 0; }
+
+  .logo-text {
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: -0.3px;
+    color: var(--text);
+  }
+
+  .header-nav {
+    display: flex;
+    gap: 0;
+  }
+
+  .header-nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 16px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    transition: color var(--transition);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .header-nav a:hover { color: var(--text); }
+
+  .header-nav a.active {
+    color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-login {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+
+  .btn-login:hover { border-color: var(--text-dim); color: var(--text); }
+
+  .reset-btn {
+    display: none;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 12px;
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+
+  .reset-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+  .reset-btn kbd {
+    font-size: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-family: inherit;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  /* ── View Toggle ────────────────────────────────────────── */
+  #wizard-view { display: block; }
+  #dashboard-view { display: none; }
+
+  body.dashboard-active #wizard-view { display: none; }
+  body.dashboard-active #dashboard-view { display: block; }
+  body.dashboard-active .reset-btn { display: flex; }
+
+  /* ── Wizard ─────────────────────────────────────────────── */
+  .wizard {
+    max-width: 900px;
+    padding: 40px 24px 80px;
+  }
+
+  .wizard-header {
+    margin-bottom: 36px;
+  }
+
+  .wizard-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .wizard-header p {
+    font-size: 15px;
+    color: var(--text-dim);
+  }
+
+  /* Step Dots */
+  .step-dots { display: none; }
+
+  /* Step Labels */
+  .step-labels {
+    display: flex;
+    gap: 32px;
+    margin-bottom: 36px;
+  }
+
+  .step-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    transition: color 0.3s ease;
+  }
+
+  .step-label.active { color: var(--accent-blue); }
+  .step-label.completed { color: var(--accent-teal); }
+
+  /* Step Container */
+  .step-container {
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .step {
+    display: none;
+    animation: stepFadeIn 0.35s ease;
+  }
+
+  .step.active { display: block; }
+
+  @keyframes stepFadeIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .step-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .step-subtitle {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+
+  /* Network Select (Step 1) */
+  .network-select {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B7280' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .network-select:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(53, 53, 240, 0.12);
+  }
+
+  .network-select option:disabled {
+    color: #999;
+  }
+
+  /* Cloud Provider Cards (Step 2) */
+  .provider-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  .provider-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+  }
+
+  .provider-card:hover { border-color: #C7C9CE; box-shadow: var(--shadow); }
+
+  .provider-card.selected {
+    border-color: var(--accent-blue);
+    box-shadow: 0 0 0 3px rgba(53, 53, 240, 0.12);
+  }
+
+  .provider-icon {
+    font-size: 32px;
+    margin-bottom: 12px;
+  }
+
+  .provider-name {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .provider-detail {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .provider-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(53, 53, 240, 0.08);
+    color: var(--accent-blue);
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Region List (Step 3) */
+  .region-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .region-item {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .region-item:hover { border-color: #C7C9CE; }
+
+  .region-item.selected {
+    border-color: var(--accent-blue);
+    background: rgba(53, 53, 240, 0.03);
+  }
+
+  .region-left { display: flex; align-items: center; gap: 12px; }
+
+  .region-code {
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+    color: var(--text);
+  }
+
+  .region-name { font-size: 13px; color: var(--text-dim); }
+
+  .region-latency {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent-teal);
+  }
+
+  /* Node Config (Step 4) */
+  /* Pipeline Visualization */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .pipeline-node {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    transition: all 0.3s ease;
+  }
+
+  .pipeline-node.enabled {
+    background: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: white;
+  }
+
+  .pipeline-arrow {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .node-config-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .node-config-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    align-items: center;
+    gap: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .node-config-card.enabled { border-color: var(--accent-blue); }
+
+  .node-toggle {
+    width: 40px;
+    height: 22px;
+    border-radius: 11px;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .node-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease;
+  }
+
+  .node-toggle.on { background: var(--accent-blue); }
+  .node-toggle.on::after { transform: translateX(18px); }
+
+  .node-config-info h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .node-config-info p {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .node-config-info .node-resources {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .node-config-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .node-count-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition);
+  }
+
+  .node-count-btn:hover { border-color: var(--accent-blue); color: var(--accent-blue); }
+
+  .node-count-value {
+    font-size: 18px;
+    font-weight: 700;
+    min-width: 24px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Review (Step 5) */
+  .review-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .review-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+  }
+
+  .review-section h4 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .review-value {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .review-detail { font-size: 13px; color: var(--text-dim); }
+
+  .review-nodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .review-node-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .review-node-item:last-child { border-bottom: none; }
+
+  /* Wizard Navigation */
+  .wizard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 32px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .btn {
+    padding: 10px 24px;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-secondary {
+    background: var(--bg);
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover:not(:disabled) { border-color: var(--text-dim); color: var(--text); }
+
+  .btn-primary {
+    background: var(--accent-blue);
+    color: white;
+  }
+
+  .btn-primary:hover:not(:disabled) { background: #2929d4; }
+
+  .btn-deploy {
+    background: var(--accent-teal);
+    color: white;
+    font-size: 16px;
+    padding: 14px 40px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-deploy:hover:not(:disabled) { background: #26b89d; }
+
+  /* ── Deploy Overlay ─────────────────────────────────────── */
+  .deploy-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 46, 0.95);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 24px;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .deploy-overlay.show { display: flex; opacity: 1; }
+
+  .deploy-overlay h2 {
+    color: white;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .deploy-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 360px;
+  }
+
+  .deploy-step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: rgba(255,255,255,0.3);
+    font-size: 15px;
+    transition: all 0.4s ease;
+  }
+
+  .deploy-step.active { color: rgba(255,255,255,0.7); }
+  .deploy-step.done { color: var(--accent-teal); }
+
+  .deploy-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+  }
+
+  .deploy-step.active .deploy-check {
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  .deploy-step.done .deploy-check {
+    border-color: var(--accent-teal);
+    background: var(--accent-teal);
+    color: white;
+  }
+
+  .deploy-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* ── Dashboard ──────────────────────────────────────────── */
+  .dashboard {
+    max-width: 1200px;
+    padding: 24px;
+  }
+
+  .dash-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .dash-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .dash-header h1 {
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .network-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent-teal);
+    background: rgba(46, 205, 176, 0.08);
+    padding: 4px 12px;
+    border-radius: 20px;
+  }
+
+  .network-badge .dot {
+    width: 7px;
+    height: 7px;
+    background: var(--accent-teal);
+    border-radius: 50%;
+    animation: pulse-dot 2s infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .dash-stats {
+    display: flex;
+    gap: 24px;
+  }
+
+  .dash-stat {
+    text-align: right;
+  }
+
+  .dash-stat-value {
+    font-size: 15px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash-stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+
+  .card-badge {
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-weight: 600;
+  }
+
+  .badge-teal { background: rgba(46,205,176,0.1); color: #1a9e82; }
+  .badge-blue { background: rgba(53,53,240,0.08); color: var(--accent-blue); }
+  .badge-gold { background: rgba(245,213,71,0.15); color: #a8860a; }
+
+  /* Node Status Table */
+  .node-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .node-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .node-table td {
+    padding: 14px 12px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .node-table tr:last-child td { border-bottom: none; }
+
+  .node-table tr { cursor: pointer; transition: background var(--transition); }
+  .node-table tbody tr:hover { background: var(--card-hover); }
+
+  .node-type-name {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .node-type-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+    flex-shrink: 0;
+  }
+
+  .node-role-text {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .uptime-value {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent-teal);
+  }
+
+  .node-expand-row {
+    display: none;
+  }
+
+  .node-expand-row.show {
+    display: table-row;
+  }
+
+  .node-expand-row td {
+    padding: 0 12px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .node-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    background: var(--bg);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+  }
+
+  .node-detail-item .ndi-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .node-detail-item .ndi-value {
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  .full-coverage-note {
+    font-size: 12px;
+    color: var(--accent-blue);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    padding: 8px 14px;
+    background: rgba(53, 53, 240, 0.04);
+    border-radius: var(--radius);
+  }
+
+  /* Two Column Grid */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .two-col .card { margin-bottom: 0; }
+
+  /* Staking Distribution */
+  .staking-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .staking-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .staking-bar-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 90px;
+  }
+
+  .staking-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .staking-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  .staking-bar-fill.blue { background: var(--accent-blue); }
+  .staking-bar-fill.teal { background: var(--accent-teal); }
+  .staking-bar-fill.gold { background: var(--accent-gold); }
+  .staking-bar-fill.navy { background: var(--text); }
+
+  .staking-bar-value {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 80px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .staking-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .staking-total-label {
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+
+  .staking-total-value {
+    font-size: 20px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Network Summary */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  .summary-item {
+    padding: 12px 14px;
+    background: var(--bg);
+    border-radius: var(--radius);
+  }
+
+  .summary-item-value {
+    font-size: 18px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 2px;
+  }
+
+  .summary-item-value.gold { color: #b8920a; }
+  .summary-item-value.teal { color: var(--accent-teal); }
+  .summary-item-value.red { color: var(--accent-red); }
+
+  .summary-item-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  /* Epoch History Table */
+  .epoch-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .epoch-table th {
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .epoch-table td {
+    padding: 10px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .epoch-table tr:last-child td { border-bottom: none; }
+
+  .epoch-table .reward { color: #b8920a; font-weight: 600; }
+  .epoch-table .uptime { color: var(--accent-teal); font-weight: 600; }
+
+  /* Activity Feed */
+  .activity-feed {
+    max-height: 440px;
+    overflow-y: auto;
+  }
+
+  .activity-feed::-webkit-scrollbar { width: 4px; }
+  .activity-feed::-webkit-scrollbar-track { background: transparent; }
+  .activity-feed::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .feed-entry {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .feed-entry:last-child { border-bottom: none; }
+
+  .feed-time {
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    font-size: 11px;
+    min-width: 56px;
+    flex-shrink: 0;
+  }
+
+  .feed-tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 3px;
+    margin-right: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    vertical-align: middle;
+  }
+
+  .tag-block { background: rgba(53,53,240,0.08); color: var(--accent-blue); }
+  .tag-stake { background: rgba(46,205,176,0.1); color: #1a9e82; }
+  .tag-reward { background: rgba(245,213,71,0.15); color: #a8860a; }
+  .tag-node { background: rgba(107,114,128,0.1); color: var(--text-dim); }
+  .tag-exec { background: rgba(53,53,240,0.08); color: var(--accent-blue); }
+
+  .feed-text { color: var(--text-dim); }
+
+  /* ── Animations ─────────────────────────────────────────── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate-in {
+    animation: fadeInUp 0.4s ease forwards;
+  }
+
+  @keyframes countUp {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ── Rewards Center ─────────────────────────────────────── */
+  .rewards-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .rewards-chart-container {
+    position: relative;
+    margin-bottom: 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg);
+    padding: 16px 12px 8px;
+  }
+
+  .rewards-chart {
+    width: 100%;
+    display: block;
+  }
+
+  .chart-label {
+    font-size: 10px;
+    fill: var(--text-muted);
+    font-family: inherit;
+  }
+
+  .chart-x-label {
+    font-size: 9px;
+    fill: var(--text-muted);
+    font-family: inherit;
+    text-anchor: middle;
+  }
+
+  .chart-grid-line {
+    stroke: var(--border);
+    stroke-width: 1;
+  }
+
+  .rewards-tooltip {
+    position: absolute;
+    background: #1A1A2E;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  .rewards-tooltip.visible { opacity: 1; }
+
+  .chart-hover-line {
+    stroke: var(--text-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .chart-hover-dot {
+    fill: #b8920a;
+    stroke: #fff;
+    stroke-width: 2;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .range-toggles {
+    display: flex;
+    gap: 4px;
+  }
+
+  .range-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+
+  .range-btn:hover { border-color: var(--text-dim); }
+
+  .range-btn.active {
+    background: rgba(245, 213, 71, 0.15);
+    border-color: #b8920a;
+    color: #b8920a;
+  }
+
+  .rewards-breakdown-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .rewards-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .rewards-bar-label {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 90px;
+  }
+
+  .rewards-bar-track {
+    flex: 1;
+    height: 24px;
+    background: var(--bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .rewards-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #F5D547, #b8920a);
+    transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 0;
+  }
+
+  .rewards-bar-value {
+    font-size: 12px;
+    font-weight: 600;
+    min-width: 130px;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+  }
+
+  @keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes fadeAreaIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* ── Responsive ─────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .network-select { font-size: 14px; }
+    .provider-grid { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .step-labels { display: none; }
+    .node-detail-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+    .dash-stats { gap: 16px; }
+    .summary-grid { grid-template-columns: 1fr; }
+    .rewards-metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- HEADER                                                     -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-left">
+    <a href="#" class="logo">
+      <svg viewBox="0 0 194.66 260.16" xmlns="http://www.w3.org/2000/svg">
+        <path d="m194.65 64.57v131l-64.58 64.57-130.07-130.06 40.4-40.39 89.68-89.69zm-39.65 49.69s-46-7.26-31.5-69.1c-25.5 30.91-27.28 45.46-25.5 63.65s19.94 43.71 43.65 43.7h13.35z" fill="#3535F0"/>
+      </svg>
+      <span class="logo-text">Bison Trails</span>
+    </a>
+    <nav class="header-nav">
+      <a href="#">Platform</a>
+      <a href="#">News</a>
+      <a href="#" class="active">Protocols</a>
+      <a href="#">About</a>
+    </nav>
+  </div>
+  <div class="header-right">
+    <button class="reset-btn" id="resetBtn" title="Reset to wizard (R)">
+      &#8635; New Validator <kbd>R</kbd>
+    </button>
+    <button class="btn-login">Log In</button>
+  </div>
+</header>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- WIZARD VIEW                                                -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="wizard-view">
+  <div class="wizard">
+    <div class="wizard-header">
+      <h1>Create Validator</h1>
+      <p>Deploy blockchain infrastructure in minutes</p>
+    </div>
+
+    <!-- Step Dots -->
+    <div class="step-dots" id="stepDots">
+      <div class="step-dot active"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+      <div class="step-dot"></div>
+    </div>
+
+    <!-- Step Labels -->
+    <div class="step-labels" id="stepLabels">
+      <span class="step-label active">Network</span>
+      <span class="step-label">Provider & Region</span>
+      <span class="step-label">Nodes</span>
+      <span class="step-label">Review</span>
+    </div>
+
+    <!-- Step Container -->
+    <div class="step-container" id="stepContainer">
+
+      <!-- STEP 1: Select Network -->
+      <div class="step active" id="step-1">
+        <div class="step-title">Select Network</div>
+        <div class="step-subtitle">Choose a blockchain protocol to deploy validators on.</div>
+
+        <select class="network-select" id="networkSelect">
+          <option value="flow">Flow — Live</option>
+          <option value="algorand">Algorand — Live</option>
+          <option value="celo">Celo — Live</option>
+          <option value="cosmos">Cosmos — Live</option>
+          <option value="tezos">Tezos — Live</option>
+          <option value="polkadot">Polkadot — Live</option>
+          <option value="eth2" disabled>ETH 2.0 — Testing</option>
+          <option value="solana" disabled>Solana — Testing</option>
+          <option value="near" disabled>NEAR — Testing</option>
+        </select>
+      </div>
+
+      <!-- STEP 2: Select Cloud Provider -->
+      <div class="step" id="step-2">
+        <div class="step-title">Select Cloud Provider</div>
+        <div class="step-subtitle">Choose your infrastructure provider. All providers support multi-region deployment.</div>
+
+        <div class="provider-grid">
+          <div class="provider-card selected" data-provider="aws">
+            <div class="provider-icon">&#9729;&#65039;</div>
+            <div class="provider-name">AWS</div>
+            <div class="provider-detail">7 regions available</div>
+            <div class="provider-badge">Recommended</div>
+          </div>
+          <div class="provider-card" data-provider="gcp">
+            <div class="provider-icon">&#9729;&#65039;</div>
+            <div class="provider-name">GCP</div>
+            <div class="provider-detail">5 regions available</div>
+          </div>
+          <div class="provider-card" data-provider="azure">
+            <div class="provider-icon">&#9729;&#65039;</div>
+            <div class="provider-name">Azure</div>
+            <div class="provider-detail">6 regions available</div>
+          </div>
+        </div>
+
+        <div class="step-title" id="regionTitle" style="margin-top: 32px; display: none;">Select Region</div>
+        <div class="step-subtitle" id="regionSubtitle" style="display: none;">Choose a deployment region for your validator nodes.</div>
+        <div class="region-list" id="regionList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- STEP 3: Configure Node Types -->
+      <div class="step" id="step-3">
+        <div class="step-title">Configure Validator Nodes</div>
+        <div class="step-subtitle">Flow separates work across specialized node roles instead of requiring every node to do everything. Bison Trails supports all four.</div>
+
+        <!-- Pipeline visualization -->
+        <div class="pipeline" id="pipeline">
+          <span class="pipeline-node enabled" data-pipe="collection">Collection</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="consensus">Consensus</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="execution">Execution</span>
+          <span class="pipeline-arrow">&rarr;</span>
+          <span class="pipeline-node enabled" data-pipe="verification">Verification</span>
+        </div>
+
+        <div class="node-config-grid" id="nodeConfigGrid">
+          <!-- Populated by JS -->
+        </div>
+
+      </div>
+
+      <!-- STEP 4: Review & Launch -->
+      <div class="step" id="step-4">
+        <div class="step-title">Review &amp; Deploy</div>
+        <div class="step-subtitle">Confirm your configuration before deploying.</div>
+
+        <div class="review-grid" id="reviewGrid">
+          <!-- Populated by JS -->
+        </div>
+
+        <div style="margin-top:24px;">
+          <button class="btn btn-deploy" id="deployBtn">Deploy Validators</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Wizard Navigation -->
+    <div class="wizard-nav" id="wizardNav">
+      <button class="btn btn-secondary" id="prevBtn" disabled>&larr; Back</button>
+      <button class="btn btn-primary" id="nextBtn">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- DEPLOY OVERLAY                                             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div class="deploy-overlay" id="deployOverlay">
+  <h2>Deploying Validators</h2>
+  <div class="deploy-steps" id="deploySteps">
+    <!-- Populated by JS -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- DASHBOARD VIEW                                             -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<div id="dashboard-view">
+  <div class="dashboard">
+    <!-- Dashboard Header -->
+    <div class="dash-header">
+      <div class="dash-header-left">
+        <h1>Your Flow Nodes</h1>
+        <div class="network-badge">
+          <span class="dot"></span>
+          Connected to Flow Mainnet
+        </div>
+      </div>
+      <div class="dash-stats">
+        <div class="dash-stat">
+          <div class="dash-stat-value" id="dashStaked">1,250,000 FLOW</div>
+          <div class="dash-stat-label">Total Staked</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-value" style="color:var(--accent-teal)">99.97%</div>
+          <div class="dash-stat-label">Cluster Health</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-value">847</div>
+          <div class="dash-stat-label">Current Epoch</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rewards Center -->
+    <div class="card" id="rewardsCenter">
+      <div class="card-header">
+        <span class="card-title">Rewards Center</span>
+        <div class="range-toggles">
+          <button class="range-btn" data-range="10">Last 10</button>
+          <button class="range-btn" data-range="30">Last 30</button>
+          <button class="range-btn active" data-range="all">All Time</button>
+        </div>
+      </div>
+
+      <div class="rewards-metrics" id="rewardsMetrics">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="rewards-chart-container">
+        <svg class="rewards-chart" id="rewardsChart" viewBox="0 0 760 240" preserveAspectRatio="xMidYMid meet">
+          <!-- Populated by JS -->
+        </svg>
+        <div class="rewards-tooltip" id="rewardsTooltip"></div>
+      </div>
+
+      <div class="rewards-breakdown-bars" id="rewardsBreakdown">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Node Status Panel -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Node Status</span>
+        <span class="card-badge badge-teal" id="nodeCountBadge">30 Active</span>
+      </div>
+
+      <table class="node-table" id="nodeTable">
+        <thead>
+          <tr>
+            <th>Node Type</th>
+            <th>Nodes</th>
+            <th>Status</th>
+            <th>Uptime</th>
+            <th>Last Epoch</th>
+            <th>Role</th>
+          </tr>
+        </thead>
+        <tbody id="nodeTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Two Column: Staking Distribution + Network Summary -->
+    <div class="two-col">
+      <!-- Staking Distribution -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Staking Distribution</span>
+          <span class="card-badge badge-blue">4 Node Types</span>
+        </div>
+
+        <div class="staking-bars" id="stakingBars">
+          <!-- Populated by JS -->
+        </div>
+
+        <div class="staking-total">
+          <span class="staking-total-label">Total FLOW Staked</span>
+          <span class="staking-total-value">1,250,000</span>
+        </div>
+      </div>
+
+      <!-- Network Summary -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Network Summary</span>
+        </div>
+
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-item-value">1,250,000</div>
+            <div class="summary-item-label">Total FLOW Staked</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-item-value teal">99.97%</div>
+            <div class="summary-item-label">Cluster Uptime</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-item-value">Oct 13, 2020</div>
+            <div class="summary-item-label">Active Since</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-item-value">Multi-region</div>
+            <div class="summary-item-label">Regions (non-US)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Epoch History -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Epoch History</span>
+        <span class="card-badge badge-gold">Last 10 Epochs</span>
+      </div>
+
+      <table class="epoch-table">
+        <thead>
+          <tr>
+            <th>Epoch</th>
+            <th>Uptime</th>
+            <th>Blocks Produced</th>
+            <th>Rewards Earned</th>
+            <th>Node Participation</th>
+          </tr>
+        </thead>
+        <tbody id="epochTableBody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Blockchain Activity Feed -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Blockchain Activity</span>
+        <span class="card-badge badge-teal">Live Feed</span>
+      </div>
+
+      <div class="activity-feed" id="activityFeed">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT                                                 -->
+<!-- ══════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  'use strict';
+
+  /* ══════════════════════════════════════════════════════════ */
+  /* STATE                                                      */
+  /* ══════════════════════════════════════════════════════════ */
+
+  var state = {
+    currentStep: 1,
+    totalSteps: 4,
+    protocol: 'flow',
+    provider: 'aws',
+    region: 'us-east-1',
+    nodes: {
+      collection:   { enabled: true, count: 0,  role: 'Transaction pool management', resources: 'Bandwidth-heavy' },
+      consensus:    { enabled: true, count: 0, role: 'Block finalization (HotStuff BFT)', resources: 'Moderate' },
+      execution:    { enabled: false, count: 0,  role: 'Operated by Bison Trails internally', resources: 'CPU/Memory-heavy' },
+      verification: { enabled: true, count: 0,  role: 'Execution correctness verification', resources: 'Moderate' }
+    }
+  };
+
+  var regions = {
+    aws: [
+      { code: 'us-east-1',      name: 'N. Virginia',        latency: '~8ms' },
+      { code: 'us-west-2',      name: 'Oregon',             latency: '~10ms' },
+      { code: 'us-east-2',      name: 'Ohio',               latency: '~9ms' },
+      { code: 'eu-west-1',      name: 'Ireland',            latency: '~12ms' },
+      { code: 'eu-central-1',   name: 'Frankfurt',          latency: '~15ms' },
+      { code: 'ap-southeast-1', name: 'Singapore',          latency: '~28ms' },
+      { code: 'ap-northeast-1', name: 'Tokyo',              latency: '~32ms' }
+    ],
+    gcp: [
+      { code: 'us-central1',        name: 'Iowa',        latency: '~7ms' },
+      { code: 'us-east4',           name: 'N. Virginia',  latency: '~9ms' },
+      { code: 'europe-west1',       name: 'Belgium',      latency: '~14ms' },
+      { code: 'europe-west3',       name: 'Frankfurt',    latency: '~16ms' },
+      { code: 'asia-southeast1',    name: 'Singapore',    latency: '~30ms' }
+    ],
+    azure: [
+      { code: 'eastus',         name: 'Virginia',       latency: '~8ms' },
+      { code: 'westus2',        name: 'Washington',     latency: '~11ms' },
+      { code: 'centralus',      name: 'Iowa',           latency: '~9ms' },
+      { code: 'westeurope',     name: 'Netherlands',    latency: '~13ms' },
+      { code: 'northeurope',    name: 'Ireland',        latency: '~14ms' },
+      { code: 'southeastasia',  name: 'Singapore',      latency: '~29ms' }
+    ]
+  };
+
+  /* ══════════════════════════════════════════════════════════ */
+  /* WIZARD LOGIC                                               */
+  /* ══════════════════════════════════════════════════════════ */
+
+  var stepDots = document.getElementById('stepDots').children;
+  var stepLabelsEls = document.getElementById('stepLabels').children;
+  var prevBtn = document.getElementById('prevBtn');
+  var nextBtn = document.getElementById('nextBtn');
+  var wizardNav = document.getElementById('wizardNav');
+  var deployBtn = document.getElementById('deployBtn');
+
+  function goToStep(n) {
+    if (n < 1 || n > state.totalSteps) return;
+    state.currentStep = n;
+
+    // Update dots
+    for (var i = 0; i < stepDots.length; i++) {
+      stepDots[i].className = 'step-dot' +
+        (i + 1 === n ? ' active' : '') +
+        (i + 1 < n ? ' completed' : '');
+    }
+
+    // Update labels
+    for (var j = 0; j < stepLabelsEls.length; j++) {
+      stepLabelsEls[j].className = 'step-label' +
+        (j + 1 === n ? ' active' : '') +
+        (j + 1 < n ? ' completed' : '');
+    }
+
+    // Show/hide steps
+    var steps = document.querySelectorAll('.step');
+    steps.forEach(function (s) { s.classList.remove('active'); });
+    document.getElementById('step-' + n).classList.add('active');
+
+    // Navigation buttons
+    prevBtn.disabled = (n === 1);
+    if (n === state.totalSteps) {
+      wizardNav.style.display = 'none';
+    } else {
+      wizardNav.style.display = 'flex';
+      nextBtn.textContent = 'Next →';
+    }
+
+    // Populate dynamic content
+    if (n === 2) renderRegions();
+    if (n === 3) renderNodeConfig();
+    if (n === 4) renderReview();
+  }
+
+  prevBtn.addEventListener('click', function () { goToStep(state.currentStep - 1); });
+  nextBtn.addEventListener('click', function () { goToStep(state.currentStep + 1); });
+
+  /* ── Step 1: Protocol Selection ──────────────────────────── */
+  document.getElementById('networkSelect').addEventListener('change', function () {
+    state.protocol = this.value;
+  });
+
+  /* ── Step 2: Provider Selection ──────────────────────────── */
+  document.querySelectorAll('.provider-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('.provider-card').forEach(function (c) { c.classList.remove('selected'); });
+      card.classList.add('selected');
+      state.provider = card.dataset.provider;
+      // Reset region selection
+      state.region = regions[state.provider][0].code;
+      renderRegions();
+    });
+  });
+
+  /* ── Step 3: Region Selection ────────────────────────────── */
+  function renderRegions() {
+    var list = document.getElementById('regionList');
+    var providerRegions = regions[state.provider];
+    var regionTitle = document.getElementById('regionTitle');
+    var subtitle = document.getElementById('regionSubtitle');
+    regionTitle.style.display = 'block';
+    subtitle.style.display = 'block';
+    subtitle.textContent = 'Choose a deployment region for ' + state.provider.toUpperCase() + '. US regions listed first.';
+
+    list.innerHTML = '';
+    providerRegions.forEach(function (r, i) {
+      var el = document.createElement('div');
+      el.className = 'region-item' + (r.code === state.region ? ' selected' : '');
+      el.innerHTML =
+        '<div class="region-left">' +
+          '<span class="region-code">' + r.code + '</span>' +
+          '<span class="region-name">' + r.name + '</span>' +
+          (i === 0 ? '<span style="font-size:10px;font-weight:600;color:var(--accent-blue);background:rgba(53,53,240,0.08);padding:2px 8px;border-radius:10px;">RECOMMENDED</span>' : '') +
+        '</div>';
+      el.addEventListener('click', function () {
+        list.querySelectorAll('.region-item').forEach(function (ri) { ri.classList.remove('selected'); });
+        el.classList.add('selected');
+        state.region = r.code;
+      });
+      list.appendChild(el);
+    });
+  }
+
+  /* ── Step 4: Node Configuration ──────────────────────────── */
+  function renderNodeConfig() {
+    var grid = document.getElementById('nodeConfigGrid');
+    grid.innerHTML = '';
+    var nodeTypes = ['collection', 'consensus', 'execution', 'verification'];
+    var nodeLabels = {
+      collection: 'Collection',
+      consensus: 'Consensus',
+      execution: 'Execution',
+      verification: 'Verification'
+    };
+
+    nodeTypes.forEach(function (type) {
+      var n = state.nodes[type];
+      var card = document.createElement('div');
+      card.className = 'node-config-card' + (n.enabled ? ' enabled' : '');
+      card.innerHTML =
+        '<button class="node-toggle' + (n.enabled ? ' on' : '') + '" data-type="' + type + '"></button>' +
+        '<div class="node-config-info">' +
+          '<h4>' + nodeLabels[type] + '</h4>' +
+          '<p>' + n.role + '</p>' +
+          '<div class="node-resources">' + n.resources + '</div>' +
+        '</div>' +
+        '<div class="node-config-controls">' +
+          '<button class="node-count-btn" data-action="dec" data-type="' + type + '">−</button>' +
+          '<span class="node-count-value" id="count-' + type + '">' + n.count + '</span>' +
+          '<button class="node-count-btn" data-action="inc" data-type="' + type + '">+</button>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+
+    // Toggle handlers
+    grid.querySelectorAll('.node-toggle').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var type = btn.dataset.type;
+        state.nodes[type].enabled = !state.nodes[type].enabled;
+        renderNodeConfig();
+        updatePipeline();
+      });
+    });
+
+    // Count handlers
+    grid.querySelectorAll('.node-count-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var type = btn.dataset.type;
+        var action = btn.dataset.action;
+        if (action === 'inc') state.nodes[type].count++;
+        if (action === 'dec' && state.nodes[type].count > 1) state.nodes[type].count--;
+        renderNodeConfig();
+      });
+    });
+
+    updatePipeline();
+  }
+
+  function updatePipeline() {
+    document.querySelectorAll('.pipeline-node').forEach(function (el) {
+      var type = el.dataset.pipe;
+      if (state.nodes[type].enabled) {
+        el.classList.add('enabled');
+      } else {
+        el.classList.remove('enabled');
+      }
+    });
+  }
+
+  /* ── Step 5: Review ──────────────────────────────────────── */
+  function renderReview() {
+    var grid = document.getElementById('reviewGrid');
+    var providerNames = { aws: 'Amazon Web Services (AWS)', gcp: 'Google Cloud Platform (GCP)', azure: 'Microsoft Azure' };
+    var regionName = '';
+    var providerRegions = regions[state.provider];
+    for (var i = 0; i < providerRegions.length; i++) {
+      if (providerRegions[i].code === state.region) {
+        regionName = providerRegions[i].name;
+        break;
+      }
+    }
+
+    var enabledNodes = [];
+    var totalNodes = 0;
+    Object.keys(state.nodes).forEach(function (type) {
+      var n = state.nodes[type];
+      if (n.enabled) {
+        enabledNodes.push({ type: type, count: n.count });
+        totalNodes += n.count;
+      }
+    });
+
+    var nodesHtml = enabledNodes.map(function (n) {
+      return '<div class="review-node-item"><span>' +
+        n.type.charAt(0).toUpperCase() + n.type.slice(1) +
+        ' &times; ' + n.count + '</span></div>';
+    }).join('');
+
+    grid.innerHTML =
+      '<div class="review-section">' +
+        '<h4>Network</h4>' +
+        '<div class="review-value">' + state.protocol.charAt(0).toUpperCase() + state.protocol.slice(1) + '</div>' +
+        '<div class="review-detail">Mainnet &middot; All 4 node types supported</div>' +
+      '</div>' +
+      '<div class="review-section">' +
+        '<h4>Infrastructure</h4>' +
+        '<div class="review-value">' + providerNames[state.provider] + '</div>' +
+        '<div class="review-detail">' + state.region + ' (' + regionName + ')</div>' +
+      '</div>' +
+      '<div class="review-section">' +
+        '<h4>Node Configuration &mdash; ' + totalNodes + ' Nodes</h4>' +
+        '<div class="review-nodes-list">' + nodesHtml + '</div>' +
+      '</div>';
+
+    // Show wizard nav is hidden on step 5 — deploy button is inside the step
+    wizardNav.style.display = 'none';
+  }
+
+  /* ══════════════════════════════════════════════════════════ */
+  /* DEPLOY ANIMATION                                           */
+  /* ══════════════════════════════════════════════════════════ */
+
+  deployBtn.addEventListener('click', function () {
+    deployBtn.disabled = true;
+    deployBtn.textContent = 'Deploying...';
+
+    // Build deploy steps based on enabled node types
+    var deployStepsData = [{ text: 'Initializing cloud resources...' }];
+    Object.keys(state.nodes).forEach(function (type) {
+      if (state.nodes[type].enabled) {
+        deployStepsData.push({ text: 'Deploying ' + type + ' nodes...' });
+      }
+    });
+    deployStepsData.push({ text: 'Configuring monitoring...' });
+    deployStepsData.push({ text: 'Validators online!' });
+
+    var deployStepsEl = document.getElementById('deploySteps');
+    deployStepsEl.innerHTML = '';
+    deployStepsData.forEach(function (s) {
+      var el = document.createElement('div');
+      el.className = 'deploy-step';
+      el.innerHTML = '<div class="deploy-check"></div><span>' + s.text + '</span>';
+      deployStepsEl.appendChild(el);
+    });
+
+    // Show overlay
+    var overlay = document.getElementById('deployOverlay');
+    overlay.style.display = 'flex';
+    requestAnimationFrame(function () { overlay.classList.add('show'); });
+
+    // Stagger through steps
+    var stepEls = deployStepsEl.querySelectorAll('.deploy-step');
+    var delay = 400;
+    var interval = 400;
+
+    stepEls.forEach(function (el, i) {
+      // Activate
+      setTimeout(function () {
+        el.classList.add('active');
+        el.querySelector('.deploy-check').innerHTML = '<span class="deploy-spinner"></span>';
+      }, delay + i * interval);
+
+      // Complete
+      setTimeout(function () {
+        el.classList.remove('active');
+        el.classList.add('done');
+        el.querySelector('.deploy-check').innerHTML = '&#10003;';
+      }, delay + i * interval + interval - 80);
+    });
+
+    // Transition to dashboard
+    var totalTime = delay + stepEls.length * interval + 600;
+    setTimeout(function () {
+      overlay.classList.remove('show');
+      setTimeout(function () {
+        overlay.style.display = 'none';
+        showDashboard();
+      }, 400);
+    }, totalTime);
+  });
+
+  /* ══════════════════════════════════════════════════════════ */
+  /* DASHBOARD                                                  */
+  /* ══════════════════════════════════════════════════════════ */
+
+  function showDashboard() {
+    document.body.classList.add('dashboard-active');
+    renderDashboard();
+    animateDashboard();
+  }
+
+  function renderDashboard() {
+    renderRewardsMetrics();
+    renderRewardsChart('all');
+    renderRewardsByType();
+    setupRewardsTooltip();
+    setupRangeToggles();
+    renderNodeTable();
+    renderStakingBars();
+    renderEpochHistory();
+    renderActivityFeed();
+    updateNodeCountBadge();
+  }
+
+  function updateNodeCountBadge() {
+    var total = 0;
+    Object.keys(state.nodes).forEach(function (type) {
+      if (state.nodes[type].enabled) total += state.nodes[type].count;
+    });
+    document.getElementById('nodeCountBadge').textContent = total + ' Active';
+  }
+
+  /* ── Node Status Table ───────────────────────────────────── */
+  var dashNodeData = {
+    collection:   { uptime: '99.98%', epoch: '1,247 tx/s',         detail: { region: 'us-east-1', cpu: '34%', memory: '2.1 GB', network: '890 Mbps', validator: '0x7a3f...c291e847' } },
+    consensus:    { uptime: '99.99%', epoch: '0 missed blocks',    detail: { region: 'us-east-1', cpu: '28%', memory: '1.4 GB', network: '120 Mbps', validator: '0x2b91...a012f4c8' } },
+    execution:    { uptime: '99.97%', epoch: '8.4M contract calls', detail: { region: 'us-west-2', cpu: '72%', memory: '14.2 GB', network: '340 Mbps', validator: '0xf4c8...9d3e7a1b' } },
+    verification: { uptime: '99.99%', epoch: '1.2M chunks verified', detail: { region: 'us-east-1', cpu: '41%', memory: '3.8 GB', network: '210 Mbps', validator: '0x9d3e...b527c4f0' } }
+  };
+
+  function renderNodeTable() {
+    var tbody = document.getElementById('nodeTableBody');
+    tbody.innerHTML = '';
+    var nodeLabels = { collection: 'Collection', consensus: 'Consensus', execution: 'Execution', verification: 'Verification' };
+    var nodeOrder = ['collection', 'consensus', 'execution', 'verification'];
+
+    nodeOrder.forEach(function (type) {
+      var n = state.nodes[type];
+      var d = dashNodeData[type];
+      if (!n.enabled) return;
+
+      // Main row
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><span class="node-type-name"><span class="node-type-dot"></span>' + nodeLabels[type] + '</span></td>' +
+        '<td><strong>' + n.count + '</strong></td>' +
+        '<td style="color:var(--accent-teal);font-weight:600;">Active</td>' +
+        '<td><span class="uptime-value">' + d.uptime + '</span></td>' +
+        '<td>' + d.epoch + '</td>' +
+        '<td class="node-role-text">' + n.role + '</td>';
+
+      // Expand row
+      var expandTr = document.createElement('tr');
+      expandTr.className = 'node-expand-row';
+      expandTr.innerHTML =
+        '<td colspan="6">' +
+          '<div class="node-detail-grid">' +
+            '<div class="node-detail-item"><div class="ndi-label">Region</div><div class="ndi-value">' + d.detail.region + '</div></div>' +
+            '<div class="node-detail-item"><div class="ndi-label">Avg CPU</div><div class="ndi-value">' + d.detail.cpu + '</div></div>' +
+            '<div class="node-detail-item"><div class="ndi-label">Avg Memory</div><div class="ndi-value">' + d.detail.memory + '</div></div>' +
+            '<div class="node-detail-item"><div class="ndi-label">Network I/O</div><div class="ndi-value">' + d.detail.network + '</div></div>' +
+            '<div class="node-detail-item"><div class="ndi-label">Validator Address</div><div class="ndi-value" style="font-family:monospace;font-size:12px;">' + d.detail.validator + '</div></div>' +
+          '</div>' +
+        '</td>';
+
+      tr.addEventListener('click', function () {
+        var isShown = expandTr.classList.contains('show');
+        // Collapse all
+        tbody.querySelectorAll('.node-expand-row').forEach(function (r) { r.classList.remove('show'); });
+        if (!isShown) expandTr.classList.add('show');
+      });
+
+      tbody.appendChild(tr);
+      tbody.appendChild(expandTr);
+    });
+  }
+
+  /* ── Staking Distribution ────────────────────────────────── */
+  function renderStakingBars() {
+    var container = document.getElementById('stakingBars');
+    container.innerHTML = '';
+    var stakingTypes = ['collection', 'consensus', 'execution', 'verification'];
+    var colors = { collection: 'blue', consensus: 'teal', execution: 'navy', verification: 'gold' };
+    var labels = { collection: 'Collection', consensus: 'Consensus', execution: 'Execution', verification: 'Verification' };
+    var total = 1250000;
+    var perType = total / 4;
+
+    stakingTypes.forEach(function (type) {
+      if (!state.nodes[type].enabled) return;
+      var row = document.createElement('div');
+      row.className = 'staking-bar-row';
+      row.innerHTML =
+        '<span class="staking-bar-label">' + labels[type] + '</span>' +
+        '<div class="staking-bar-track"><div class="staking-bar-fill ' + colors[type] + '" data-width="25%"></div></div>' +
+        '<span class="staking-bar-value">' + Math.round(perType).toLocaleString() + ' FLOW</span>';
+      container.appendChild(row);
+    });
+  }
+
+  /* ── Epoch History ───────────────────────────────────────── */
+  function renderEpochHistory() {
+    var tbody = document.getElementById('epochTableBody');
+    tbody.innerHTML = '';
+    var epochs = [
+      { epoch: 847, uptime: '99.99%', blocks: '12,847', rewards: '1,284.5', participation: '30/30' },
+      { epoch: 846, uptime: '99.98%', blocks: '12,691', rewards: '1,271.2', participation: '30/30' },
+      { epoch: 845, uptime: '99.99%', blocks: '12,923', rewards: '1,298.7', participation: '30/30' },
+      { epoch: 844, uptime: '99.97%', blocks: '12,584', rewards: '1,260.1', participation: '30/30' },
+      { epoch: 843, uptime: '99.99%', blocks: '12,776', rewards: '1,279.4', participation: '30/30' },
+      { epoch: 842, uptime: '99.96%', blocks: '12,451', rewards: '1,247.8', participation: '29/30' },
+      { epoch: 841, uptime: '99.99%', blocks: '12,892', rewards: '1,291.6', participation: '30/30' },
+      { epoch: 840, uptime: '99.98%', blocks: '12,634', rewards: '1,265.2', participation: '30/30' },
+      { epoch: 839, uptime: '99.99%', blocks: '12,745', rewards: '1,276.3', participation: '30/30' },
+      { epoch: 838, uptime: '99.97%', blocks: '12,518', rewards: '1,253.9', participation: '30/30' }
+    ];
+
+    epochs.forEach(function (e) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td><strong>' + e.epoch + '</strong></td>' +
+        '<td class="uptime">' + e.uptime + '</td>' +
+        '<td>' + e.blocks + '</td>' +
+        '<td class="reward">' + e.rewards + ' FLOW</td>' +
+        '<td>' + e.participation + '</td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── Blockchain Activity Feed ────────────────────────────── */
+  function renderActivityFeed() {
+    var feed = document.getElementById('activityFeed');
+    feed.innerHTML = '';
+    var entries = [
+      { time: '10:42', tag: 'block',  label: 'Block',     text: 'Block #14,283,091 finalized — 2.8s consensus time' },
+      { time: '10:41', tag: 'stake',  label: 'Stake',     text: 'Delegation received: 12,500 FLOW from 0x7a3f...c291' },
+      { time: '10:40', tag: 'exec',   label: 'Execution', text: 'Execution state committed — 842 transactions processed' },
+      { time: '10:39', tag: 'block',  label: 'Block',     text: 'Block #14,283,090 finalized — 2.5s consensus time' },
+      { time: '10:38', tag: 'reward', label: 'Reward',    text: 'Epoch 847 rewards: +1,284.5 FLOW distributed to 23 delegators' },
+      { time: '10:37', tag: 'node',   label: 'Node',      text: 'Consensus node #7 — heartbeat OK, 0 missed blocks' },
+      { time: '10:36', tag: 'stake',  label: 'Stake',     text: 'Delegation received: 8,200 FLOW from 0x2b91...e847' },
+      { time: '10:35', tag: 'exec',   label: 'Execution', text: 'Contract call batch: 1,247 CryptoKitties transfers processed' },
+      { time: '10:34', tag: 'block',  label: 'Block',     text: 'Block #14,283,089 finalized — 2.6s consensus time' },
+      { time: '10:33', tag: 'node',   label: 'Node',      text: 'Collection cluster rebalanced — 8 nodes, 0 dropped transactions' },
+      { time: '10:32', tag: 'reward', label: 'Reward',    text: 'Staking reward accrual: 142.3 FLOW pending for next epoch' },
+      { time: '10:31', tag: 'stake',  label: 'Stake',     text: 'New delegator: 0xf4c8...a012 staked 5,000 FLOW' },
+      { time: '10:30', tag: 'exec',   label: 'Execution', text: 'Execution state snapshot — 8.4M cumulative contract calls this epoch' },
+      { time: '10:29', tag: 'node',   label: 'Node',      text: 'Verification node #3 — chunk verification complete, 0 discrepancies' },
+      { time: '10:28', tag: 'block',  label: 'Block',     text: 'Block #14,283,088 finalized — 2.4s consensus time' }
+    ];
+
+    entries.forEach(function (e) {
+      var el = document.createElement('div');
+      el.className = 'feed-entry';
+      el.innerHTML =
+        '<span class="feed-time">' + e.time + '</span>' +
+        '<span class="feed-text"><span class="feed-tag tag-' + e.tag + '">' + e.label + '</span>' + e.text + '</span>';
+      feed.appendChild(el);
+    });
+  }
+
+  /* ── Rewards Center ──────────────────────────────────────── */
+  var rewardsEpochData = (function () {
+    // Generate 80 epochs of mock data (768-847)
+    // Last 10 match the Epoch History table values
+    var last10 = [
+      { epoch: 838, rewards: 1253.9 },
+      { epoch: 839, rewards: 1276.3 },
+      { epoch: 840, rewards: 1265.2 },
+      { epoch: 841, rewards: 1291.6 },
+      { epoch: 842, rewards: 1247.8 },
+      { epoch: 843, rewards: 1279.4 },
+      { epoch: 844, rewards: 1260.1 },
+      { epoch: 845, rewards: 1298.7 },
+      { epoch: 846, rewards: 1271.2 },
+      { epoch: 847, rewards: 1284.5 }
+    ];
+    var data = [];
+    // Generate epochs 768-837 with realistic variation
+    for (var i = 768; i <= 837; i++) {
+      var base = 1200 + Math.sin(i * 0.3) * 80 + Math.cos(i * 0.7) * 40;
+      // Add a growth trend over time
+      base += (i - 768) * 0.8;
+      data.push({ epoch: i, rewards: Math.round(base * 10) / 10 });
+    }
+    return data.concat(last10);
+  })();
+
+  var rewardsByType = [
+    { type: 'Consensus',    flow: 35686.6, pct: 34.8, color: '#2ECDB0' },
+    { type: 'Collection',   flow: 28538.1, pct: 27.9, color: '#3535F0' },
+    { type: 'Execution',    flow: 22427.5, pct: 21.9, color: '#1A1A2E' },
+    { type: 'Verification', flow: 15798.0, pct: 15.4, color: '#F5D547' }
+  ];
+
+  function getRewardsSlice(range) {
+    if (range === '10') return rewardsEpochData.slice(-10);
+    if (range === '30') return rewardsEpochData.slice(-30);
+    return rewardsEpochData;
+  }
+
+  function renderRewardsMetrics() {
+    var container = document.getElementById('rewardsMetrics');
+    var total = 0;
+    rewardsEpochData.forEach(function (d) { total += d.rewards; });
+    total = Math.round(total * 10) / 10;
+
+    var lastEpoch = rewardsEpochData[rewardsEpochData.length - 1].rewards;
+    var prevEpoch = rewardsEpochData[rewardsEpochData.length - 2].rewards;
+    var trend = ((lastEpoch - prevEpoch) / prevEpoch * 100);
+    var trendSign = trend >= 0 ? '+' : '';
+    var trendColor = trend >= 0 ? 'teal' : 'red';
+
+    container.innerHTML =
+      '<div class="summary-item">' +
+        '<div class="summary-item-value gold">' + total.toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1}) + '</div>' +
+        '<div class="summary-item-label">Total Rewards Earned (FLOW)</div>' +
+      '</div>' +
+      '<div class="summary-item">' +
+        '<div class="summary-item-value gold">' + lastEpoch.toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1}) + '</div>' +
+        '<div class="summary-item-label">Last Epoch Reward (FLOW)</div>' +
+      '</div>' +
+      '<div class="summary-item">' +
+        '<div class="summary-item-value teal">8.2%</div>' +
+        '<div class="summary-item-label">Annual Rewards Rate</div>' +
+      '</div>' +
+      '<div class="summary-item">' +
+        '<div class="summary-item-value ' + trendColor + '">' + trendSign + trend.toFixed(1) + '%</div>' +
+        '<div class="summary-item-label">Epoch-over-Epoch Trend</div>' +
+      '</div>';
+  }
+
+  function renderRewardsChart(range) {
+    var svg = document.getElementById('rewardsChart');
+    var data = getRewardsSlice(range);
+    var n = data.length;
+    if (n === 0) return;
+
+    // Chart dimensions within viewBox
+    var padL = 55, padR = 15, padT = 15, padB = 30;
+    var w = 760 - padL - padR;
+    var h = 240 - padT - padB;
+
+    var minY = Infinity, maxY = -Infinity;
+    data.forEach(function (d) {
+      if (d.rewards < minY) minY = d.rewards;
+      if (d.rewards > maxY) maxY = d.rewards;
+    });
+    // Add 10% padding to Y range
+    var rangeY = maxY - minY || 1;
+    minY = Math.floor((minY - rangeY * 0.1) / 10) * 10;
+    maxY = Math.ceil((maxY + rangeY * 0.1) / 10) * 10;
+    rangeY = maxY - minY;
+
+    function xPos(i) { return padL + (i / Math.max(n - 1, 1)) * w; }
+    function yPos(v) { return padT + (1 - (v - minY) / rangeY) * h; }
+
+    var svgContent = '';
+
+    // Gradient definition
+    svgContent += '<defs>' +
+      '<linearGradient id="rewardsGrad" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0%" stop-color="#F5D547" stop-opacity="0.35"/>' +
+        '<stop offset="100%" stop-color="#F5D547" stop-opacity="0.02"/>' +
+      '</linearGradient>' +
+    '</defs>';
+
+    // Horizontal grid lines (5 lines)
+    for (var g = 0; g <= 4; g++) {
+      var gridY = padT + (g / 4) * h;
+      var gridVal = maxY - (g / 4) * rangeY;
+      svgContent += '<line x1="' + padL + '" y1="' + gridY + '" x2="' + (760 - padR) + '" y2="' + gridY + '" class="chart-grid-line"/>';
+      svgContent += '<text x="' + (padL - 8) + '" y="' + (gridY + 3) + '" class="chart-label" text-anchor="end">' + Math.round(gridVal).toLocaleString() + '</text>';
+    }
+
+    // Build line path and area path
+    var linePath = '';
+    var areaPath = '';
+    var points = [];
+
+    data.forEach(function (d, i) {
+      var x = xPos(i);
+      var y = yPos(d.rewards);
+      points.push({ x: x, y: y, epoch: d.epoch, rewards: d.rewards });
+      if (i === 0) {
+        linePath += 'M' + x + ',' + y;
+        areaPath += 'M' + x + ',' + y;
+      } else {
+        linePath += ' L' + x + ',' + y;
+        areaPath += ' L' + x + ',' + y;
+      }
+    });
+
+    // Close area path
+    areaPath += ' L' + xPos(n - 1) + ',' + (padT + h) + ' L' + padL + ',' + (padT + h) + ' Z';
+
+    // Area fill
+    svgContent += '<path d="' + areaPath + '" fill="url(#rewardsGrad)" class="rewards-area" style="animation: fadeAreaIn 0.8s ease 0.3s both;"/>';
+
+    // Calculate total line length for draw animation
+    var totalLen = 0;
+    for (var p = 1; p < points.length; p++) {
+      var dx = points[p].x - points[p-1].x;
+      var dy = points[p].y - points[p-1].y;
+      totalLen += Math.sqrt(dx * dx + dy * dy);
+    }
+
+    // Line stroke
+    svgContent += '<path d="' + linePath + '" fill="none" stroke="#b8920a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:' + Math.ceil(totalLen) + ';stroke-dashoffset:' + Math.ceil(totalLen) + ';animation:drawLine 1.2s ease forwards;"/>';
+
+    // X-axis labels (show ~8-12 labels max)
+    var step = Math.max(1, Math.floor(n / 10));
+    for (var xi = 0; xi < n; xi += step) {
+      svgContent += '<text x="' + xPos(xi) + '" y="' + (padT + h + 20) + '" class="chart-x-label">' + data[xi].epoch + '</text>';
+    }
+    // Always show last epoch
+    if ((n - 1) % step !== 0) {
+      svgContent += '<text x="' + xPos(n - 1) + '" y="' + (padT + h + 20) + '" class="chart-x-label">' + data[n - 1].epoch + '</text>';
+    }
+
+    // Hover elements (hidden by default)
+    svgContent += '<line id="chartHoverLine" class="chart-hover-line" x1="0" y1="' + padT + '" x2="0" y2="' + (padT + h) + '"/>';
+    svgContent += '<circle id="chartHoverDot" class="chart-hover-dot" r="4" cx="0" cy="0"/>';
+
+    // Invisible hit rects for hover
+    svgContent += '<rect id="chartHitArea" x="' + padL + '" y="' + padT + '" width="' + w + '" height="' + h + '" fill="transparent" style="cursor:crosshair;"/>';
+
+    svg.innerHTML = svgContent;
+
+    // Store points for tooltip lookup
+    svg._chartPoints = points;
+    svg._padT = padT;
+    svg._h = h;
+  }
+
+  function setupRewardsTooltip() {
+    var svg = document.getElementById('rewardsChart');
+    var tooltip = document.getElementById('rewardsTooltip');
+    var hitArea = document.getElementById('chartHitArea');
+    var hoverLine = document.getElementById('chartHoverLine');
+    var hoverDot = document.getElementById('chartHoverDot');
+
+    if (!hitArea) return;
+
+    hitArea.addEventListener('mousemove', function (e) {
+      var points = svg._chartPoints;
+      if (!points || points.length === 0) return;
+
+      var rect = svg.getBoundingClientRect();
+      var scaleX = 760 / rect.width;
+      var svgX = (e.clientX - rect.left) * scaleX;
+
+      // Find nearest point
+      var closest = 0;
+      var closestDist = Infinity;
+      points.forEach(function (p, i) {
+        var d = Math.abs(p.x - svgX);
+        if (d < closestDist) { closestDist = d; closest = i; }
+      });
+
+      var pt = points[closest];
+
+      // Update hover elements
+      hoverLine.setAttribute('x1', pt.x);
+      hoverLine.setAttribute('x2', pt.x);
+      hoverLine.style.opacity = '1';
+      hoverDot.setAttribute('cx', pt.x);
+      hoverDot.setAttribute('cy', pt.y);
+      hoverDot.style.opacity = '1';
+
+      // Position tooltip
+      var tooltipX = (pt.x / 760) * rect.width;
+      var tooltipY = (pt.y / 240) * rect.height;
+      tooltip.textContent = 'Epoch ' + pt.epoch + '  |  ' + pt.rewards.toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1}) + ' FLOW';
+      tooltip.classList.add('visible');
+      tooltip.style.left = tooltipX + 'px';
+      tooltip.style.top = (tooltipY - 36) + 'px';
+      tooltip.style.transform = 'translateX(-50%)';
+    });
+
+    hitArea.addEventListener('mouseleave', function () {
+      hoverLine.style.opacity = '0';
+      hoverDot.style.opacity = '0';
+      tooltip.classList.remove('visible');
+    });
+  }
+
+  function renderRewardsByType() {
+    var container = document.getElementById('rewardsBreakdown');
+    container.innerHTML = '';
+    var maxPct = 0;
+    rewardsByType.forEach(function (r) { if (r.pct > maxPct) maxPct = r.pct; });
+
+    rewardsByType.forEach(function (r) {
+      var row = document.createElement('div');
+      row.className = 'rewards-bar-row';
+      var barWidthPct = (r.pct / maxPct * 100).toFixed(1);
+      row.innerHTML =
+        '<span class="rewards-bar-label">' + r.type + '</span>' +
+        '<div class="rewards-bar-track"><div class="rewards-bar-fill" data-width="' + barWidthPct + '%" style="background:' + r.color + ';"></div></div>' +
+        '<span class="rewards-bar-value">' + r.flow.toLocaleString(undefined, {minimumFractionDigits:1, maximumFractionDigits:1}) + ' FLOW (' + r.pct + '%)</span>';
+      container.appendChild(row);
+    });
+  }
+
+  function setupRangeToggles() {
+    var btns = document.querySelectorAll('.range-btn');
+    btns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        btns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        renderRewardsChart(btn.dataset.range);
+        setupRewardsTooltip();
+      });
+    });
+  }
+
+  /* ── Dashboard Entry Animation ───────────────────────────── */
+  function animateDashboard() {
+    // Animate staking bars
+    setTimeout(function () {
+      document.querySelectorAll('.staking-bar-fill').forEach(function (bar) {
+        bar.style.width = bar.dataset.width;
+      });
+    }, 200);
+
+    // Animate rewards breakdown bars
+    setTimeout(function () {
+      document.querySelectorAll('.rewards-bar-fill').forEach(function (bar) {
+        bar.style.width = bar.dataset.width;
+      });
+    }, 400);
+  }
+
+  /* ══════════════════════════════════════════════════════════ */
+  /* RESET                                                      */
+  /* ══════════════════════════════════════════════════════════ */
+
+  function resetToWizard() {
+    document.body.classList.remove('dashboard-active');
+    state.currentStep = 1;
+    state.protocol = 'flow';
+    state.provider = 'aws';
+    state.region = 'eu-west-1';
+    state.nodes = {
+      collection:   { enabled: true, count: 0,  role: 'Transaction pool management', resources: 'Bandwidth-heavy' },
+      consensus:    { enabled: true, count: 0, role: 'Block finalization (HotStuff BFT)', resources: 'Moderate' },
+      execution:    { enabled: false, count: 0,  role: 'Operated by Bison Trails internally', resources: 'CPU/Memory-heavy' },
+      verification: { enabled: true, count: 0,  role: 'Execution correctness verification', resources: 'Moderate' }
+    };
+
+    // Reset protocol selection
+    document.getElementById('networkSelect').value = 'flow';
+
+    // Reset provider selection
+    document.querySelectorAll('.provider-card').forEach(function (c) { c.classList.remove('selected'); });
+    document.querySelector('.provider-card[data-provider="aws"]').classList.add('selected');
+
+    // Reset region section
+    document.getElementById('regionTitle').style.display = 'none';
+    document.getElementById('regionSubtitle').style.display = 'none';
+    document.getElementById('regionList').innerHTML = '';
+
+    // Reset deploy button
+    deployBtn.disabled = false;
+    deployBtn.textContent = 'Deploy Validators';
+
+    goToStep(1);
+  }
+
+  document.getElementById('resetBtn').addEventListener('click', resetToWizard);
+
+  // Keyboard shortcut: R to reset
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'r' || e.key === 'R') {
+      // Don't trigger if user is typing in an input
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (document.body.classList.contains('dashboard-active')) {
+        resetToWizard();
+      }
+    }
+  });
+
+  /* ══════════════════════════════════════════════════════════ */
+  /* INIT                                                       */
+  /* ══════════════════════════════════════════════════════════ */
+
+  goToStep(1);
+
+})();
+</script>
+</body>
+</html>

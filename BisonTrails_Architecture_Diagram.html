@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bison Trails — Platform Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bt-blue: #3535F0;
+    --bt-teal: #2ECDB0;
+    --bt-yellow: #F5D547;
+    --bg: #F5F5F7;
+    --bg-card: #FFFFFF;
+    --text-primary: #1A1A2E;
+    --text-secondary: #6B7280;
+    --text-muted: #9CA3AF;
+    --border: #E5E7EB;
+    --border-hover: #D1D5DB;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.08);
+    --radius: 12px;
+    --radius-lg: 16px;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Nav Bar ── */
+  .navbar {
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+    height: 64px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-right: 48px;
+  }
+  .nav-logo svg { width: 28px; height: 28px; }
+  .nav-logo span {
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 32px;
+    height: 100%;
+    align-items: center;
+  }
+  .nav-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: default;
+  }
+  .nav-link.active {
+    color: var(--bt-blue);
+  }
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--bt-blue);
+    border-radius: 3px 3px 0 0;
+  }
+
+  /* ── Page Header ── */
+  .page-header {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 40px 40px 0;
+  }
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.8px;
+    margin-bottom: 8px;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 640px;
+  }
+
+  /* ── Step Wizard ── */
+  .wizard {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 28px 40px 0;
+    display: flex;
+    gap: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .wizard-step {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-bottom: 14px;
+    position: relative;
+    cursor: default;
+  }
+  .wizard-step.active {
+    color: var(--bt-teal);
+  }
+  .wizard-step.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--bt-teal);
+    border-radius: 2px;
+  }
+  .wizard-step.completed {
+    color: var(--bt-blue);
+  }
+
+  /* ── Main Content ── */
+  .content {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 40px 64px;
+  }
+
+  /* ── Layer Sections ── */
+  .layer-section {
+    margin-bottom: 24px;
+  }
+  .layer-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .layer-header h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.3px;
+  }
+  .layer-header .badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+  }
+  .badge-blue { background: rgba(53,53,240,0.08); color: var(--bt-blue); }
+  .badge-teal { background: rgba(46,205,176,0.1); color: #1a9a82; }
+  .badge-red { background: rgba(239,68,68,0.08); color: #DC2626; }
+  .badge-yellow { background: rgba(245,213,71,0.15); color: #92780c; }
+  .layer-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+
+  /* ── Cards ── */
+  .card-grid {
+    display: grid;
+    gap: 14px;
+  }
+  .card-grid-2 { grid-template-columns: repeat(2, 1fr); }
+  .card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .card-grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .card-grid-5 { grid-template-columns: repeat(5, 1fr); }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: all 0.15s ease;
+    cursor: default;
+    box-shadow: var(--shadow-sm);
+  }
+  .card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+  .card.card-selected {
+    border-color: var(--bt-blue);
+    box-shadow: 0 0 0 2px rgba(53,53,240,0.15), var(--shadow-md);
+  }
+  .card-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+    font-size: 20px;
+  }
+  .icon-blue { background: rgba(53,53,240,0.08); }
+  .icon-teal { background: rgba(46,205,176,0.1); }
+  .icon-red { background: rgba(239,68,68,0.08); }
+  .icon-yellow { background: rgba(245,213,71,0.15); }
+  .icon-gray { background: rgba(107,114,128,0.08); }
+
+  .card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+  }
+  .card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+  .card .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-top: 12px;
+  }
+
+  /* ── Connector ── */
+  .connector {
+    display: flex;
+    justify-content: center;
+    padding: 6px 0;
+  }
+  .connector svg {
+    width: 24px;
+    height: 32px;
+  }
+
+  /* ── Flow Pipeline ── */
+  .flow-pipeline {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    margin-top: 16px;
+  }
+  .flow-pipeline-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .flow-pipeline-header h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .flow-pipeline-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 20px;
+  }
+  .flow-pipeline-nodes {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+  }
+  .fp-node {
+    flex: 1;
+    text-align: center;
+    padding: 20px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    position: relative;
+  }
+  .fp-node:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+  .fp-node:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
+  .fp-node:not(:last-child) { border-right: none; }
+  .fp-node.fp-highlight {
+    background: rgba(46,205,176,0.06);
+    border-color: var(--bt-teal);
+    z-index: 1;
+    border-right: 1px solid var(--bt-teal);
+  }
+  .fp-node-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    font-size: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+  .fp-highlight .fp-node-icon {
+    border-color: var(--bt-teal);
+    background: rgba(46,205,176,0.08);
+  }
+  .fp-node-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .fp-highlight .fp-node-name { color: #0d7d66; }
+  .fp-node-role {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .fp-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0;
+    position: relative;
+    z-index: 2;
+  }
+  .fp-arrow::after {
+    content: '→';
+    position: absolute;
+    font-size: 14px;
+    color: var(--bt-blue);
+    font-weight: 700;
+    background: var(--bg);
+    padding: 2px;
+    border-radius: 4px;
+  }
+
+  /* ── Protocol Grid ── */
+  .proto-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+  .proto-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 12px;
+    text-align: center;
+    transition: all 0.15s ease;
+    cursor: default;
+    box-shadow: var(--shadow-sm);
+  }
+  .proto-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+  }
+  .proto-card.proto-featured {
+    border-color: var(--bt-blue);
+    box-shadow: 0 0 0 2px rgba(53,53,240,0.12), var(--shadow-md);
+  }
+  .proto-card .proto-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .proto-card .proto-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .proto-featured .proto-name { color: var(--bt-blue); }
+  .proto-card .proto-type {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .proto-card .recommended {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--bt-teal);
+    background: rgba(46,205,176,0.1);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+
+  /* ── Staking Flow ── */
+  .staking-strip {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+  }
+  .staking-step {
+    flex: 1;
+    padding: 24px 16px;
+    text-align: center;
+    border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .staking-step:last-child { border-right: none; }
+  .staking-step.staking-highlight {
+    background: rgba(53,53,240,0.03);
+  }
+  .staking-step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    background: var(--bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+  .staking-highlight .staking-step-num {
+    background: var(--bt-blue);
+    color: white;
+    border-color: var(--bt-blue);
+  }
+  .staking-step h4 {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+  .staking-step p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+  }
+  .staking-step .step-arrow {
+    position: absolute;
+    right: -8px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 16px;
+    height: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--bt-blue);
+  }
+
+  /* ── Cluster Anatomy ── */
+  .cluster-diagram {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+    margin-top: 16px;
+  }
+  .cluster-diagram h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .cluster-diagram .cd-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+  .cluster-nodes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+  }
+  .cluster-node {
+    text-align: center;
+    padding: 16px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    min-width: 120px;
+    flex: 1;
+    max-width: 180px;
+  }
+  .cluster-node .cn-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .cn-primary { background: rgba(53,53,240,0.1); border: 1px solid rgba(53,53,240,0.2); }
+  .cn-sentry { background: rgba(46,205,176,0.1); border: 1px solid rgba(46,205,176,0.2); }
+  .cn-failover { background: rgba(245,213,71,0.15); border: 1px solid rgba(245,213,71,0.3); }
+  .cn-monitor { background: rgba(107,114,128,0.1); border: 1px solid rgba(107,114,128,0.2); }
+  .cluster-node h4 { font-size: 12px; font-weight: 700; color: var(--text-primary); margin-bottom: 2px; }
+  .cluster-node p { font-size: 10px; color: var(--text-muted); }
+  .cluster-conn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: var(--text-muted);
+    font-size: 10px;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+  .cluster-conn .conn-line {
+    width: 32px;
+    height: 1px;
+    background: var(--border);
+    position: relative;
+  }
+  .cluster-conn .conn-line::after {
+    content: '';
+    position: absolute;
+    right: -2px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+    border-left: 5px solid var(--border);
+  }
+
+  /* ── Risk Panel ── */
+  .risk-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    margin-top: 16px;
+    box-shadow: var(--shadow-sm);
+    border-left: 3px solid #DC2626;
+  }
+  .risk-panel h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .risk-items {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .risk-item h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .risk-item p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+  }
+
+  /* ── Divider ── */
+  .section-sep {
+    max-width: 1120px;
+    margin: 32px auto 0;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .section-sep h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+  .section-sep .sep-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .footer-nav { display: flex; gap: 24px; }
+  .footer-nav a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .card-grid-2, .card-grid-3, .card-grid-4 { grid-template-columns: 1fr; }
+    .proto-grid { grid-template-columns: repeat(3, 1fr); }
+    .flow-pipeline-nodes { flex-direction: column; }
+    .fp-node { border-radius: var(--radius) !important; border-right: 1px solid var(--border) !important; }
+    .fp-arrow::after { transform: rotate(90deg); }
+    .staking-strip { flex-direction: column; }
+    .staking-step { border-right: none; border-bottom: 1px solid var(--border); }
+    .staking-step .step-arrow { display: none; }
+    .risk-items { grid-template-columns: 1fr; }
+    .cluster-nodes { flex-direction: column; }
+    .navbar { padding: 0 20px; }
+    .content, .page-header, .wizard { padding-left: 20px; padding-right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Nav Bar ── -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <svg viewBox="0 0 194.66 260.16" xmlns="http://www.w3.org/2000/svg">
+      <path d="m194.65 64.57v131l-64.58 64.57-130.07-130.06 40.4-40.39 89.68-89.69zm-39.65 49.69s-46-7.26-31.5-69.1c-25.5 30.91-27.28 45.46-25.5 63.65s19.94 43.71 43.65 43.7h13.35z" fill="#3535F0"/>
+    </svg>
+    <span>Bison Trails</span>
+  </div>
+  <div class="nav-links">
+    <a class="nav-link" href="#">Platform</a>
+    <a class="nav-link" href="#">News</a>
+    <a class="nav-link active" href="#">Protocols</a>
+    <a class="nav-link" href="#">About</a>
+  </div>
+</nav>
+
+<!-- ── Page Header ── -->
+<div class="page-header">
+  <h1>Platform Architecture</h1>
+  <p>How Bison Trails provisions validator infrastructure across proof-of-stake protocols, with a deep dive into Flow's multi-role node architecture.</p>
+</div>
+
+<!-- ── Step Wizard ── -->
+<div class="wizard">
+  <div class="wizard-step completed">Products</div>
+  <div class="wizard-step completed">Control Plane</div>
+  <div class="wizard-step active">Orchestration</div>
+  <div class="wizard-step">Security</div>
+  <div class="wizard-step">Infrastructure</div>
+  <div class="wizard-step">Networks</div>
+  <div class="wizard-step">Staking</div>
+</div>
+
+<!-- ── Main Content ── -->
+<div class="content">
+
+  <!-- ═══ LAYER 1: Products ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>Customer-Facing Products</h2>
+      <span class="badge badge-yellow">2 Product Lines</span>
+    </div>
+    <div class="card-grid card-grid-2">
+      <div class="card card-selected">
+        <div class="card-icon-wrap icon-blue">⬡</div>
+        <h3>Participate</h3>
+        <p>Run a dedicated participation cluster — validator node + supporting infra — on 20+ PoS networks. One-click deploy. No hardware management.</p>
+        <span class="tag badge-blue">Staking & Validation</span>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-teal">⇌</div>
+        <h3>Query & Transact (QT)</h3>
+        <p>Read/write access to 40+ blockchain networks. Single-tenant QT clusters connect off-chain systems to on-chain data.</p>
+        <span class="tag badge-teal">Data & Transactions</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <svg viewBox="0 0 24 32" fill="none">
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#D1D5DB" stroke-width="2"/>
+      <path d="M7 19 L12 28 L17 19" fill="#D1D5DB"/>
+    </svg>
+  </div>
+
+  <!-- ═══ LAYER 2: Control Plane ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>API & Control Plane</h2>
+      <span class="badge badge-teal">Management Layer</span>
+    </div>
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <div class="card-icon-wrap icon-gray">🖥</div>
+        <h3>Dashboard UI</h3>
+        <p>Web console for node management, staking analytics, cluster health monitoring, and epoch performance. MFA-protected access.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-blue">⚙</div>
+        <h3>Platform API</h3>
+        <p>Programmatic cluster provisioning, node lifecycle management, staking operations, and telemetry endpoints.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-teal">📊</div>
+        <h3>Monitoring & Alerts</h3>
+        <p>Real-time health tracking, reward accumulation, slashing risk detection, and performance anomaly alerts per node.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <svg viewBox="0 0 24 32" fill="none">
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#D1D5DB" stroke-width="2"/>
+      <path d="M7 19 L12 28 L17 19" fill="#D1D5DB"/>
+    </svg>
+  </div>
+
+  <!-- ═══ LAYER 3: Orchestration ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>Orchestration Engine</h2>
+      <span class="badge badge-blue">Core Platform</span>
+    </div>
+    <p class="layer-desc">The brain of the platform. Translates a one-click "Create Validator" request into a fully provisioned, multi-cloud cluster with protocol-specific configuration.</p>
+    <div class="card-grid card-grid-4">
+      <div class="card">
+        <div class="card-icon-wrap icon-blue">🔄</div>
+        <h3>Cluster Manager</h3>
+        <p>Provisions participation clusters: primary validator + sentry nodes + failover replicas. Manages full node lifecycle.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-teal">📈</div>
+        <h3>Auto-Scale / Heal</h3>
+        <p>Scales node resources based on network load and automatically recovers from failures to minimize downtime.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-blue">🌐</div>
+        <h3>Multi-Cloud Router</h3>
+        <p>Distributes nodes across AWS, GCP, and Azure on 4 continents. Cascading failover across clouds and regions.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-gray">🔌</div>
+        <h3>Protocol Adapters</h3>
+        <p>Normalizes each protocol's consensus rules, staking mechanics, and upgrade paths into a unified provisioning interface.</p>
+      </div>
+    </div>
+
+    <!-- Cluster Anatomy -->
+    <div class="cluster-diagram">
+      <h3>Anatomy of a Participation Cluster</h3>
+      <p class="cd-desc">Each validator deployment includes a coordinated set of nodes with built-in redundancy and monitoring.</p>
+      <div class="cluster-nodes">
+        <div class="cluster-node">
+          <div class="cn-dot cn-primary">🟦</div>
+          <h4>Validator Node</h4>
+          <p>Signs blocks · Private network</p>
+        </div>
+        <div class="cluster-conn">
+          <div class="conn-line"></div>
+        </div>
+        <div class="cluster-node">
+          <div class="cn-dot cn-sentry">🟩</div>
+          <h4>Sentry Nodes</h4>
+          <p>Public interface · DDoS shield</p>
+        </div>
+        <div class="cluster-conn">
+          <div class="conn-line"></div>
+        </div>
+        <div class="cluster-node">
+          <div class="cn-dot cn-failover">🟧</div>
+          <h4>Failover Replica</h4>
+          <p>Hot standby · Key-lock protection</p>
+        </div>
+        <div class="cluster-conn">
+          <div class="conn-line"></div>
+        </div>
+        <div class="cluster-node">
+          <div class="cn-dot cn-monitor">📡</div>
+          <h4>Monitoring Agent</h4>
+          <p>Health · Telemetry · Alerts</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <svg viewBox="0 0 24 32" fill="none">
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#D1D5DB" stroke-width="2"/>
+      <path d="M7 19 L12 28 L17 19" fill="#D1D5DB"/>
+    </svg>
+  </div>
+
+  <!-- ═══ LAYER 4: Security ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>Security & Key Management</h2>
+      <span class="badge badge-red">Non-Custodial</span>
+    </div>
+    <div class="card-grid card-grid-3">
+      <div class="card">
+        <div class="card-icon-wrap icon-red">🔐</div>
+        <h3>Non-Custodial Keys</h3>
+        <p>Private keys never exposed to operators. Nodes can't move tokens. Stakers retain full custody of assets throughout.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-red">🛡</div>
+        <h3>Double-Sign Protection</h3>
+        <p>Proprietary key-lock prevents backup nodes from pulling an active key during failover. Prioritizes slash prevention over uptime.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-red">🏰</div>
+        <h3>Sentry Architecture</h3>
+        <p>Validators sit in a private network. Sentry nodes act as the public layer — shielding validators from DDoS and network threats.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <svg viewBox="0 0 24 32" fill="none">
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#D1D5DB" stroke-width="2"/>
+      <path d="M7 19 L12 28 L17 19" fill="#D1D5DB"/>
+    </svg>
+  </div>
+
+  <!-- ═══ LAYER 5: Infrastructure ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>Distributed Infrastructure</h2>
+      <span class="badge badge-teal">Multi-Cloud · Multi-Region · 4 Continents</span>
+    </div>
+    <div class="card-grid card-grid-3">
+      <div class="card card-selected">
+        <div class="card-icon-wrap icon-blue">☁️</div>
+        <h3>AWS</h3>
+        <p>Primary compute region. Validator, sentry, and monitoring agents across multiple availability zones.</p>
+        <span class="tag" style="background: rgba(46,205,176,0.1); color: #1a9a82; font-size: 9px; font-weight: 700; letter-spacing: 1px;">RECOMMENDED</span>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-gray">☁️</div>
+        <h3>GCP</h3>
+        <p>Secondary region with hot standby replicas. Automatic failover on primary degradation. Geographic diversity.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon-wrap icon-gray">☁️</div>
+        <h3>Azure</h3>
+        <p>Tertiary failover region. Platform survives multi-cloud outages. Non-US regions for protocol compliance.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="connector">
+    <svg viewBox="0 0 24 32" fill="none">
+      <line x1="12" y1="0" x2="12" y2="24" stroke="#D1D5DB" stroke-width="2"/>
+      <path d="M7 19 L12 28 L17 19" fill="#D1D5DB"/>
+    </svg>
+  </div>
+
+  <!-- ═══ LAYER 6: Protocol Networks ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>Supported Protocol Networks</h2>
+      <span class="badge badge-blue">20+ PoS Participate · 40+ via QT</span>
+    </div>
+    <div class="proto-grid">
+      <div class="proto-card proto-featured">
+        <div class="proto-icon">🌊</div>
+        <div class="proto-name">Flow</div>
+        <div class="proto-type">All 5 node types</div>
+        <div class="recommended">Featured</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">⟐</div>
+        <div class="proto-name">Polkadot</div>
+        <div class="proto-type">Validator</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">⚛</div>
+        <div class="proto-name">Cosmos</div>
+        <div class="proto-type">Validator</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">◈</div>
+        <div class="proto-name">Tezos</div>
+        <div class="proto-type">Baker</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">⬢</div>
+        <div class="proto-name">Celo</div>
+        <div class="proto-type">Validator</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">◇</div>
+        <div class="proto-name">ETH 2.0</div>
+        <div class="proto-type">Validator</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">⊞</div>
+        <div class="proto-name">Solana</div>
+        <div class="proto-type">Validator</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">△</div>
+        <div class="proto-name">Algorand</div>
+        <div class="proto-type">Relay</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon">▣</div>
+        <div class="proto-name">Kusama</div>
+        <div class="proto-type">Validator</div>
+      </div>
+      <div class="proto-card">
+        <div class="proto-icon" style="font-size: 16px; font-weight: 700; color: var(--text-muted);">+20</div>
+        <div class="proto-name" style="color: var(--text-muted);">More</div>
+        <div class="proto-type">PoS Networks</div>
+      </div>
+    </div>
+
+    <!-- Flow Deep Dive Pipeline -->
+    <div class="flow-pipeline">
+      <div class="flow-pipeline-header">
+        <span style="font-size: 20px;">🌊</span>
+        <h3>Flow — Multi-Role Node Architecture</h3>
+        <span class="badge badge-teal">Deep Dive</span>
+      </div>
+      <p class="flow-pipeline-desc">
+        Unlike traditional blockchains where every node does everything, Flow separates work across 5 specialized roles.
+        Bison Trails was the <strong>only provider running all 5 node types</strong> and one of only 3 Execution Node operators.
+      </p>
+      <div class="flow-pipeline-nodes">
+        <div class="fp-node">
+          <div class="fp-node-icon">📥</div>
+          <div class="fp-node-name">Collection</div>
+          <div class="fp-node-role">Collects transactions into clusters. Bandwidth-optimized.</div>
+        </div>
+        <div class="fp-arrow"></div>
+        <div class="fp-node">
+          <div class="fp-node-icon">🗳</div>
+          <div class="fp-node-name">Consensus</div>
+          <div class="fp-node-role">HotStuff BFT. Proposes & finalizes blocks.</div>
+        </div>
+        <div class="fp-arrow"></div>
+        <div class="fp-node fp-highlight">
+          <div class="fp-node-icon">⚡</div>
+          <div class="fp-node-name">Execution</div>
+          <div class="fp-node-role">Most resource-intensive. Runs transactions, maintains state.</div>
+        </div>
+        <div class="fp-arrow"></div>
+        <div class="fp-node">
+          <div class="fp-node-icon">✓</div>
+          <div class="fp-node-name">Verification</div>
+          <div class="fp-node-role">Parallel correctness checks on Execution output.</div>
+        </div>
+        <div class="fp-arrow"></div>
+        <div class="fp-node">
+          <div class="fp-node-icon">🌐</div>
+          <div class="fp-node-name">Access</div>
+          <div class="fp-node-role">Public API gateway. Routes queries & transactions.</div>
+        </div>
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+        <span class="badge badge-yellow" style="font-size: 11px; padding: 5px 14px;">Staking: Divide equally among 4 types (Access nodes don't stake)</span>
+        <span class="badge badge-teal" style="font-size: 11px; padding: 5px 14px;">Execution: Only 3 operators — Bison Trails was one</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SECTION DIVIDER ═══ -->
+  <div style="display: flex; align-items: center; gap: 16px; margin: 40px 0 28px;">
+    <h2 style="font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); white-space: nowrap;">Staking Ecosystem Flow</h2>
+    <div style="flex: 1; height: 1px; background: var(--border);"></div>
+  </div>
+
+  <!-- ═══ STAKING FLOW ═══ -->
+  <div class="layer-section">
+    <div class="layer-header">
+      <h2>How Staking Flows Through the Platform</h2>
+    </div>
+    <div class="staking-strip">
+      <div class="staking-step">
+        <div class="staking-step-num">1</div>
+        <h4>Token Holder</h4>
+        <p>Holds PoS tokens (FLOW, DOT, ATOM, etc.) and wants to earn staking rewards</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="staking-step">
+        <div class="staking-step-num">2</div>
+        <h4>Delegate / Stake</h4>
+        <p>Delegates tokens to a Bison Trails validator or stakes directly via Participate cluster</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="staking-step staking-highlight">
+        <div class="staking-step-num">3</div>
+        <h4>Bison Trails Platform</h4>
+        <p>Provisions cluster, manages keys non-custodially, runs validator with sentry + failover</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="staking-step">
+        <div class="staking-step-num">4</div>
+        <h4>Protocol Network</h4>
+        <p>Validator participates in consensus, produces/validates blocks, earns protocol rewards</p>
+        <div class="step-arrow">→</div>
+      </div>
+      <div class="staking-step">
+        <div class="staking-step-num">5</div>
+        <h4>Rewards</h4>
+        <p>Protocol rewards flow back to token holder. Bison Trails takes infrastructure fee. Non-custodial throughout.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Risk Panel -->
+  <div class="risk-panel">
+    <h3>
+      <span class="badge badge-red">Security</span>
+      Risk Management in the Staking Loop
+    </h3>
+    <div class="risk-items">
+      <div class="risk-item">
+        <h4>Slashing Prevention</h4>
+        <p>Double-signing protection locks private keys during failover. Backup can't pull a key until primary releases it. Prioritizes slash avoidance over minimizing downtime.</p>
+      </div>
+      <div class="risk-item">
+        <h4>Downtime Mitigation</h4>
+        <p>Auto-healing recovers failed nodes. Multi-cloud distribution means a single cloud outage doesn't offline the cluster. Sentry node layer absorbs DDoS.</p>
+      </div>
+      <div class="risk-item">
+        <h4>Custody Guarantee</h4>
+        <p>Staker retains full token custody. Bison Trails runs the infrastructure but never holds or can move staked assets. Keys are managed but never exposed to operators.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Footer ── -->
+<div class="footer">
+  <div style="display: flex; align-items: center; gap: 10px;">
+    <svg viewBox="0 0 28 28" fill="none" width="20" height="20">
+      <rect x="4" y="14" width="14" height="14" rx="2" transform="rotate(-45 4 14)" fill="#3535F0"/>
+      <path d="M14 6 L16.5 10 L14 9 L11.5 10 Z" fill="white" opacity="0.9"/>
+    </svg>
+    <span>Bison Trails — Platform Architecture Reference</span>
+  </div>
+  <div class="footer-nav">
+    <a href="#">Platform</a>
+    <a href="#">Protocols</a>
+    <a href="#">About</a>
+  </div>
+</div>
+
+</body>
+</html>
